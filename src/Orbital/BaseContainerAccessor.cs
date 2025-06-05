@@ -6,7 +6,7 @@ namespace Orbital;
 
 public abstract class BaseContainerAccessor(
     CosmosClient cosmosClient, 
-    IOptions<IContainerSettings> containerSettings)
+    IOptions<IOrbitalContainerConfiguration> containerSettings)
     : ICosmosContainerAccessor
 {
     public Container Container { get; } = cosmosClient.GetContainer(

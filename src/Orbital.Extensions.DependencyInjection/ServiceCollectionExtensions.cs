@@ -64,13 +64,26 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration,
         string settingsKey)
         where IContainerAccessor : class, ICosmosContainerAccessor
-        where IContainerAccessorSettings : class, IContainerSettings
+        where IContainerAccessorSettings : class, IOrbitalContainerConfiguration
     {
         services.Configure<IContainerAccessorSettings>(configuration.GetSection(settingsKey));
         services.AddSingleton<IContainerAccessor>();
 
         return services;
     }
+
+    public static IServiceCollection AddOrbitalDatabaseSettings(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string settingsKey)
+        => services.Configure<OrbitalDatabaseConfiguration>(configuration.GetSection(settingsKey));
+
+    public static IServiceCollection AddCosmosContainer<TContainerAccessor>(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string settingsKey)
+        where TContainerAccessor : class, ICosmosContainerAccessor
+        => services.AddSingleton<TContainerAccessor>();
 
     public static IServiceCollection AddCosmosRepository<TEntity, TContainer>(
         this IServiceCollection services)
@@ -111,7 +124,6 @@ public static class ServiceCollectionExtensions
 
         return settings;
     }
-
 
     private class CosmosSystemTextJsonSerializer(JsonSerializerOptions jsonSerializerOptions) : CosmosSerializer
     {
