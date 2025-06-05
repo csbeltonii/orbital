@@ -2,9 +2,9 @@
 using System.Net;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
-using Orbital.Core.Interfaces;
+using Orbital.Interfaces;
 
-namespace Orbital.Core;
+namespace Orbital;
 
 public class Repository<TEntity, TContainer>(
     TContainer cosmosContainerAccessor,

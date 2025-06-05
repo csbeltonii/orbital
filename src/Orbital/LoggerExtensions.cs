@@ -2,7 +2,7 @@
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 
-namespace Orbital.Core;
+namespace Orbital;
 
 internal static class LoggerExtensions
 {

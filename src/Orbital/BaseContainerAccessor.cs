@@ -1,8 +1,8 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
-using Orbital.Core.Interfaces;
+using Orbital.Interfaces;
 
-namespace Orbital.Core;
+namespace Orbital;
 
 public abstract class BaseContainerAccessor(
     CosmosClient cosmosClient, 

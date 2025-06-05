@@ -1,4 +1,4 @@
-﻿namespace Orbital.Core.Interfaces;
+﻿namespace Orbital.Interfaces;
 
 public interface IEntity
 {

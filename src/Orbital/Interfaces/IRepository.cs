@@ -1,6 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos;
 
-namespace Orbital.Core.Interfaces;
+namespace Orbital.Interfaces;
 
 public interface IRepository<TEntity, TContainer>
     where TEntity : IEntity

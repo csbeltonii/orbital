@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using Orbital.Core.Interfaces;
+using Orbital.Interfaces;
 
-namespace Orbital.Core;
+namespace Orbital;
 
 public abstract class Entity(string userId) : SystemInformation(userId), IEntity
 {
