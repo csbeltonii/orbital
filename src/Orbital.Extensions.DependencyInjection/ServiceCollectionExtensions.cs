@@ -14,13 +14,6 @@ namespace Orbital.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static JsonSerializerOptions Options => new()
-    {
-        AllowTrailingCommas = false,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     public static IServiceCollection AddCosmosDb(
         this IServiceCollection services,
         Action<OrbitalCosmosOptions> configurationAction)
