@@ -1,6 +1,26 @@
+using Microsoft.Azure.Cosmos;
+using Orbital.Extensions.DependencyInjection;
 using Orbital.Sample.WebApi;
+using Orbital.Sample.WebApi.HierarchicalContainerExample;
+using Orbital.Sample.WebApi.SimpleContainerExample;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
+await InitiateDatabase();
+
+builder.Services
+       .AddOptions()
+       .AddOrbitalDatabaseSettings(configuration, "DatabaseSettings")
+       .AddSingleton<SimpleContainerConfiguration>()
+       .AddSingleton<HierarchicalContainerConfiguration>()
+       .AddCosmosContainer<SimpleContainer>()
+       .AddCosmosContainer<HierarchicalContainer>()
+       .AddCosmosDb(orbitalCosmosOptions =>
+       {
+           orbitalCosmosOptions.Configuration = configuration;
+           orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
+       })
+       .AddCosmosRepositories();
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -15,32 +35,30 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+app.MapSampleItemEndpoints();
+app.MapOrganizationItemEndpoints();
 
 app.Run();
+return;
 
-namespace Orbital.Sample.WebApi
+async Task InitiateDatabase()
 {
-    record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-    {
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
+    var connectionString = configuration["CosmosDbConnectionString"];
+    var cosmosClient = new CosmosClient(connectionString);
+
+    var createDatabaseResponse = await cosmosClient.CreateDatabaseIfNotExistsAsync(
+        "Orbital Test"
+    );
+
+    await createDatabaseResponse.Database.CreateContainerIfNotExistsAsync(
+        new ContainerProperties("simple-container", "/id")
+    );
+
+    await createDatabaseResponse.Database.CreateContainerIfNotExistsAsync(
+        new ContainerProperties
+        {
+            Id = "hierarchical-container",
+            PartitionKeyPaths = ["/orgId", "/id"]
+        }
+    );
 }

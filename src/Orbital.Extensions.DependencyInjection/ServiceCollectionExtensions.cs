@@ -52,15 +52,19 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddCosmosContainer<IContainerAccessor, IContainerAccessorSettings>(
+    public static IServiceCollection AddCosmosContainer<TContainerAccessor, TContainerSettings>(
         this IServiceCollection services,
         IConfiguration configuration,
         string settingsKey)
-        where IContainerAccessor : class, ICosmosContainerAccessor
-        where IContainerAccessorSettings : class, IOrbitalContainerConfiguration
+        where TContainerAccessor : class, ICosmosContainerAccessor
+        where TContainerSettings : class, IOrbitalContainerConfiguration
     {
-        services.Configure<IContainerAccessorSettings>(configuration.GetSection(settingsKey));
-        services.AddSingleton<IContainerAccessor>();
+        var settings = configuration.GetSection(settingsKey)
+                                    .Get<TContainerSettings>()
+                       ?? throw new InvalidOperationException($"Could not bind settings for '{typeof(TContainerSettings).Name}'.");
+
+        services.AddSingleton(settings);
+        services.AddSingleton<TContainerAccessor>();
 
         return services;
     }
@@ -72,9 +76,7 @@ public static class ServiceCollectionExtensions
         => services.Configure<OrbitalDatabaseConfiguration>(configuration.GetSection(settingsKey));
 
     public static IServiceCollection AddCosmosContainer<TContainerAccessor>(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        string settingsKey)
+        this IServiceCollection services)
         where TContainerAccessor : class, ICosmosContainerAccessor
         => services.AddSingleton<TContainerAccessor>();
 
@@ -83,6 +85,10 @@ public static class ServiceCollectionExtensions
         where TEntity : class, IEntity
         where TContainer : class, ICosmosContainerAccessor =>
         services.AddSingleton<IRepository<TEntity, TContainer>, Repository<TEntity, TContainer>>();
+
+    public static IServiceCollection AddCosmosRepositories(
+        this IServiceCollection services) =>
+        services.AddSingleton(typeof(IRepository<,>), typeof(Repository<,>));
 
 
     private static JsonSerializerOptions BuildSystemTextJsonOptions(IEnumerable<JsonConverter> converters)

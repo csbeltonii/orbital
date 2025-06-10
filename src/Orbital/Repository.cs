@@ -85,16 +85,22 @@ public class Repository<TEntity, TContainer>(
         }
     }
 
-    public async Task<TEntity?> UpsertAsync(TEntity entity, Func<PartitionKey> partitionKeyFactory, string etag, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> UpsertAsync(
+        TEntity entity, 
+        Func<PartitionKey> partitionKeyFactory,
+        string? etag = null,
+        CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
 
         try
         {
-            var options = new ItemRequestOptions
-            {
-                IfMatchEtag = etag
-            };
+            var options = etag is null 
+                ? null
+                : new ItemRequestOptions 
+                {
+                    IfMatchEtag = etag
+                };
 
             var partitionKey = partitionKeyFactory.Invoke();
 
@@ -147,7 +153,6 @@ public class Repository<TEntity, TContainer>(
 
             throw;
         }
-
     }
 
     public async Task<bool> DeleteAsync(string id, Func<PartitionKey> partitionKeyFactory, CancellationToken cancellationToken = default)

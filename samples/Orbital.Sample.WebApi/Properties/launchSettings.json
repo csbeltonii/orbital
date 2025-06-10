@@ -1,23 +1,25 @@
 ﻿{
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "http": {
+    "Orbital Sample Api Unsecure": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "http://localhost:5217",
+      "applicationUrl": "http://localhost:7776",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "https": {
+    "Orbital Sample Api Secure": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "https://localhost:7055;http://localhost:5217",
+      "applicationUrl": "https://localhost:7777;http://localhost:7776",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "sslPort": 7777,
+      "httpPort": 7776
     }
   }
 }
