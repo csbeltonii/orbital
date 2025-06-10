@@ -135,6 +135,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         // assert
         Assert.NotNull(result);
         Assert.Equal(expected: expectedName, actual: result.Name);
+        Assert.NotEqual(expected: createdResponse.Etag, actual: result.Etag);
     }
 
     [Fact]
@@ -176,6 +177,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         // assert
         Assert.NotNull(result);
         Assert.Equal(expected: expectedName, actual: result.Name);
+        Assert.NotEqual(expected: createdResponse.Etag, actual: result.Etag);
     }
 
     public static IEnumerable<object[]> CreateAndDeleteTestData
