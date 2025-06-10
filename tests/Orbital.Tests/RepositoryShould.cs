@@ -18,49 +18,46 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         _dbName = fixture.DatabaseName;
     }
 
-    public static IEnumerable<object[]> CreateAndRetrieveTestData
+    public static IEnumerable<object[]> GenericTestData()
     {
-        get
-        {
-            const string expectedTestDocumentId = "test1";
+        const string expectedTestDocumentId = "test1";
 
-            yield return [
-                typeof(TestDocument),
-                new ContainerProperties
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    PartitionKeyPath = "/id",
-                },
-                new TestDocument("user")
-                {
-                    Id = expectedTestDocumentId
-                },
-                () => new PartitionKeyBuilder().Add(expectedTestDocumentId).Build()
-            ];
+        yield return [
+            typeof(TestDocument),
+            new ContainerProperties
+            {
+                Id = Guid.NewGuid().ToString(),
+                PartitionKeyPath = "/id",
+            },
+            new TestDocument("user")
+            {
+                Id = expectedTestDocumentId
+            },
+            () => new PartitionKeyBuilder().Add(expectedTestDocumentId).Build()
+        ];
 
-            yield return [
-                typeof(TestHierarchicalDocument),
-                new ContainerProperties
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    PartitionKeyPaths = 
-                    [
-                        "/orgId", 
-                        "/id"
-                    ]
-                },
-                new TestHierarchicalDocument("user")
-                {
-                    Id = expectedTestDocumentId,
-                    OrgId = "org1"
-                },
-                () => new PartitionKeyBuilder().Add("org1").Add(expectedTestDocumentId).Build()
-            ];
-        }
+        yield return [
+            typeof(TestHierarchicalDocument),
+            new ContainerProperties
+            {
+                Id = Guid.NewGuid().ToString(),
+                PartitionKeyPaths = 
+                [
+                    "/orgId", 
+                    "/id"
+                ]
+            },
+            new TestHierarchicalDocument("user")
+            {
+                Id = expectedTestDocumentId,
+                OrgId = "org1"
+            },
+            () => new PartitionKeyBuilder().Add("org1").Add(expectedTestDocumentId).Build()
+        ];
     }
 
     [Theory]
-    [MemberData(nameof(CreateAndRetrieveTestData))]
+    [MemberData(nameof(GenericTestData))]
     public async Task CreateAndRetrieveEntitySuccessfully(
         Type entityType,
         ContainerProperties containerProperties,
@@ -74,7 +71,8 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         var containerAccessor = new ContainerAccessorStub(_client, settings);
 
         var method = typeof(RepositoryShould)
-                     .GetMethod(nameof(ExecuteCreateAndRetrieveTest), BindingFlags.NonPublic | BindingFlags.Instance)!
+                     .GetMethod(nameof(ExecuteCreateAndRetrieveTest), 
+                                BindingFlags.NonPublic | BindingFlags.Instance)!
                      .MakeGenericMethod(entityType);
 
         await (Task)method.Invoke(this, [containerAccessor, entity, partitionKeyFactory])!;
@@ -222,7 +220,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
     }
 
     [Theory]
-    [MemberData(nameof(CreateAndDeleteTestData))]
+    [MemberData(nameof(GenericTestData))]
     public async Task CreateAndDeleteEntitySuccessfully(
         Type entityType,
         ContainerProperties containerProperties,
