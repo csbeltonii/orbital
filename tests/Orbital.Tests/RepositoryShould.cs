@@ -26,9 +26,9 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
 
             yield return [
                 typeof(TestDocument),
-                new ContainerProperties()
+                new ContainerProperties
                 {
-                    Id = TestingConstants.SimpleContainerName,
+                    Id = Guid.NewGuid().ToString(),
                     PartitionKeyPath = "/id",
                 },
                 new TestDocument("user")
@@ -42,7 +42,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
                 typeof(TestHierarchicalDocument),
                 new ContainerProperties
                 {
-                    Id = TestingConstants.HierarchicalContainerName,
+                    Id = Guid.NewGuid().ToString(),
                     PartitionKeyPaths = 
                     [
                         "/orgId", 
@@ -61,7 +61,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
 
     [Theory]
     [MemberData(nameof(CreateAndRetrieveTestData))]
-    public async Task Create_And_Retrieve_Entity_Successfully(
+    public async Task CreateAndRetrieveEntitySuccessfully(
         Type entityType,
         ContainerProperties containerProperties,
         IEntity entity,
@@ -73,7 +73,6 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         var settings = new OrbitalContainerConfigurationStub(_dbName, containerProperties.Id);
         var containerAccessor = new ContainerAccessorStub(_client, settings);
 
-        // Use reflection to invoke the generic method
         var method = typeof(RepositoryShould)
                      .GetMethod(nameof(ExecuteCreateAndRetrieveTest), BindingFlags.NonPublic | BindingFlags.Instance)!
                      .MakeGenericMethod(entityType);
@@ -87,13 +86,176 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         Func<PartitionKey> partitionKeyFactory)
         where TEntity : class, IEntity
     {
+        // arrange
         var logger = new Mock<ILogger<Repository<TEntity, ContainerAccessorStub>>>();
-        var repo = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
+        var sut = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
 
-        await repo.CreateAsync((TEntity)entity, partitionKeyFactory);
-        var result = await repo.GetAsync(entity.Id, partitionKeyFactory);
+        // act
+        await sut.CreateAsync((TEntity)entity, partitionKeyFactory);
+        var result = await sut.GetAsync(entity.Id, partitionKeyFactory);
 
+        // assert
         Assert.NotNull(result);
         Assert.Equal(entity.Id, result.Id);
+    }
+
+    [Fact]
+    public async Task CreateAndUpdateTestDocumentSuccessfully()
+    {
+        // arrange
+        const string expectedName = "updated";
+
+        var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
+        var containerProperties = new ContainerProperties(Guid.NewGuid().ToString(), "/id");
+        await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
+
+        var settings = new OrbitalContainerConfigurationStub(_dbName, containerProperties.Id);
+        var containerAccessor = new ContainerAccessorStub(_client, settings);
+        var logger = new Mock<ILogger<Repository<TestDocument, ContainerAccessorStub>>>();
+        var sut = new Repository<TestDocument, ContainerAccessorStub>(containerAccessor, logger.Object);
+
+        var testDocument = new TestDocument("user")
+        {
+            Id = "1",
+            Name = "test"
+        };
+
+        var partitionKeyFactory = () => new PartitionKeyBuilder().Add(testDocument.Id).Build();
+
+
+        // act
+        var createdResponse = await sut.CreateAsync(testDocument, partitionKeyFactory);
+
+        createdResponse!.Name = expectedName;
+
+        await sut.UpsertAsync(createdResponse, partitionKeyFactory);
+
+        var result = await sut.GetAsync(testDocument.Id, partitionKeyFactory);
+
+        // assert
+        Assert.NotNull(result);
+        Assert.Equal(expected: expectedName, actual: result.Name);
+    }
+
+    [Fact]
+    public async Task CreateAndUpdateTestHierarchicalDocumentSuccessfully()
+    {
+        // arrange
+        const string expectedName = "updated";
+
+        var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
+        var containerProperties = new ContainerProperties(Guid.NewGuid().ToString(), partitionKeyPaths: ["/orgId", "/id"]);
+        await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
+
+        var settings = new OrbitalContainerConfigurationStub(_dbName, containerProperties.Id);
+        var containerAccessor = new ContainerAccessorStub(_client, settings);
+        var logger = new Mock<ILogger<Repository<TestHierarchicalDocument, ContainerAccessorStub>>>();
+        var sut = new Repository<TestHierarchicalDocument, ContainerAccessorStub>(containerAccessor, logger.Object);
+
+        var testDocument = new TestHierarchicalDocument("user")
+        {
+            Id = "1",
+            OrgId = "org1",
+            Name = "test"
+        };
+
+        var partitionKeyFactory = () => new PartitionKeyBuilder()
+                                        .Add(testDocument.OrgId)
+                                        .Add(testDocument.Id)
+                                        .Build();
+
+        // act
+        var createdResponse = await sut.CreateAsync(testDocument, partitionKeyFactory);
+
+        createdResponse!.Name = expectedName;
+
+        await sut.UpsertAsync(createdResponse, partitionKeyFactory);
+
+        var result = await sut.GetAsync(testDocument.Id, partitionKeyFactory);
+
+        // assert
+        Assert.NotNull(result);
+        Assert.Equal(expected: expectedName, actual: result.Name);
+    }
+
+    public static IEnumerable<object[]> CreateAndDeleteTestData
+    {
+        get
+        {
+            const string expectedTestDocumentId = "test1";
+
+            yield return [
+                typeof(TestDocument),
+                new ContainerProperties
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    PartitionKeyPath = "/id",
+                },
+                new TestDocument("user")
+                {
+                    Id = expectedTestDocumentId
+                },
+                () => new PartitionKeyBuilder().Add(expectedTestDocumentId).Build()
+            ];
+
+            yield return [
+                typeof(TestHierarchicalDocument),
+                new ContainerProperties
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    PartitionKeyPaths =
+                    [
+                        "/orgId",
+                        "/id"
+                    ]
+                },
+                new TestHierarchicalDocument("user")
+                {
+                    Id = expectedTestDocumentId,
+                    OrgId = "org1"
+                },
+                () => new PartitionKeyBuilder().Add("org1").Add(expectedTestDocumentId).Build()
+            ];
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(CreateAndDeleteTestData))]
+    public async Task CreateAndDeleteEntitySuccessfully(
+        Type entityType,
+        ContainerProperties containerProperties,
+        IEntity entity,
+        Func<PartitionKey> partitionKeyFactory)
+    {
+        var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
+        await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
+
+        var settings = new OrbitalContainerConfigurationStub(_dbName, containerProperties.Id);
+        var containerAccessor = new ContainerAccessorStub(_client, settings);
+
+        var method = typeof(RepositoryShould)
+                     .GetMethod(nameof(ExecuteCreateAndDeleteTest), BindingFlags.NonPublic | BindingFlags.Instance)!
+                     .MakeGenericMethod(entityType);
+
+        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKeyFactory])!;
+    }
+
+    private async Task ExecuteCreateAndDeleteTest<TEntity>(
+        ContainerAccessorStub accessor,
+        IEntity entity,
+        Func<PartitionKey> partitionKeyFactory)
+        where TEntity : class, IEntity
+    {
+        // arrange
+        var logger = new Mock<ILogger<Repository<TEntity, ContainerAccessorStub>>>();
+        var sut = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
+
+        // act
+        var createResponse = await sut.CreateAsync((TEntity)entity, partitionKeyFactory);
+        await sut.DeleteAsync(createResponse!.Id, partitionKeyFactory);
+        var result = await sut.GetAsync(entity.Id, partitionKeyFactory);
+        
+        // assert
+        Assert.Null(result);
     }
 }

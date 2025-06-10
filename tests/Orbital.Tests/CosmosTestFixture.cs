@@ -1,7 +1,4 @@
-﻿using System.Net;
-using Azure;
-using DotNet.Testcontainers.Builders;
-using Microsoft.Azure.Cosmos;
+﻿using Microsoft.Azure.Cosmos;
 using Testcontainers.CosmosDb;
 
 namespace Orbital.Tests;
@@ -13,8 +10,6 @@ public class CosmosTestFixture : IAsyncLifetime
     public CosmosClient CosmosClient { get; private set; }
 
     public string DatabaseName => "orbital-integration-tests";
-
-
 
     public async Task InitializeAsync()
     {
