@@ -178,47 +178,6 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         Assert.NotEqual(expected: createdResponse.Etag, actual: result.Etag);
     }
 
-    public static IEnumerable<object[]> CreateAndDeleteTestData
-    {
-        get
-        {
-            const string expectedTestDocumentId = "test1";
-
-            yield return [
-                typeof(TestDocument),
-                new ContainerProperties
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    PartitionKeyPath = "/id",
-                },
-                new TestDocument("user")
-                {
-                    Id = expectedTestDocumentId
-                },
-                () => new PartitionKeyBuilder().Add(expectedTestDocumentId).Build()
-            ];
-
-            yield return [
-                typeof(TestHierarchicalDocument),
-                new ContainerProperties
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    PartitionKeyPaths =
-                    [
-                        "/orgId",
-                        "/id"
-                    ]
-                },
-                new TestHierarchicalDocument("user")
-                {
-                    Id = expectedTestDocumentId,
-                    OrgId = "org1"
-                },
-                () => new PartitionKeyBuilder().Add("org1").Add(expectedTestDocumentId).Build()
-            ];
-        }
-    }
-
     [Theory]
     [MemberData(nameof(GenericTestData))]
     public async Task CreateAndDeleteEntitySuccessfully(
@@ -257,5 +216,90 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         
         // assert
         Assert.Null(result);
+    }
+
+    [Theory]
+    [MemberData(nameof(GenericTestData))]
+    public async Task PreventConflicts(
+        Type entityType,
+        ContainerProperties containerProperties,
+        IEntity entity,
+        Func<PartitionKey> partitionKeyFactory)
+    {
+        var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
+        await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
+
+        var settings = new OrbitalContainerConfigurationStub(_dbName, containerProperties.Id);
+        var containerAccessor = new ContainerAccessorStub(_client, settings);
+
+        var method = typeof(RepositoryShould)
+                     .GetMethod(nameof(ExecutePreventConflictsTest), BindingFlags.NonPublic | BindingFlags.Instance)!
+                     .MakeGenericMethod(entityType);
+
+        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKeyFactory])!;
+    }
+
+    private async Task ExecutePreventConflictsTest<TEntity>(
+        ContainerAccessorStub accessor,
+        IEntity entity,
+        Func<PartitionKey> partitionKeyFactory)
+        where TEntity : class, IEntity
+    {
+        // arrange
+        var logger = new Mock<ILogger<Repository<TEntity, ContainerAccessorStub>>>();
+        var sut = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
+
+        // act
+        var firstResponse = await sut.CreateAsync((TEntity)entity, partitionKeyFactory);
+        var secondResponse = await sut.CreateAsync((TEntity) entity, partitionKeyFactory);
+
+        // assert
+        Assert.NotNull(firstResponse);
+        Assert.Equal(firstResponse.Id, entity.Id);
+        Assert.Null(secondResponse);
+    }
+
+    [Theory]
+    [MemberData(nameof(GenericTestData))]
+    public async Task ProvideEtagConsistency(
+        Type entityType,
+        ContainerProperties containerProperties,
+        IEntity entity,
+        Func<PartitionKey> partitionKeyFactory)
+    {
+        var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
+        await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
+
+        var settings = new OrbitalContainerConfigurationStub(_dbName, containerProperties.Id);
+        var containerAccessor = new ContainerAccessorStub(_client, settings);
+
+        var method = typeof(RepositoryShould)
+                     .GetMethod(nameof(ExecuteProvideEtagConsistencyTest), BindingFlags.NonPublic | BindingFlags.Instance)!
+                     .MakeGenericMethod(entityType);
+
+        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKeyFactory])!;
+    }
+
+    private async Task ExecuteProvideEtagConsistencyTest<TEntity>(
+        ContainerAccessorStub accessor,
+        IEntity entity,
+        Func<PartitionKey> partitionKeyFactory)
+        where TEntity : class, IEntity
+    {
+        // arrange
+        var logger = new Mock<ILogger<Repository<TEntity, ContainerAccessorStub>>>();
+        var sut = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
+
+        // act
+        var initialResponse = await sut.CreateAsync((TEntity) entity, partitionKeyFactory);
+        var conflictingResponse = await sut.GetAsync(entity.Id, partitionKeyFactory);
+
+        var successfulUpdate = await sut.UpsertAsync(initialResponse!, partitionKeyFactory, initialResponse!.Etag);
+        var failedUpdate = await sut.UpsertAsync(conflictingResponse!, partitionKeyFactory, conflictingResponse!.Etag);
+
+        // assert
+        Assert.NotNull(successfulUpdate);
+        Assert.Null(failedUpdate);
+
     }
 }
