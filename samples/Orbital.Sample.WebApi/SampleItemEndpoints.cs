@@ -20,25 +20,25 @@ public static class SampleItemEndpoints
 
     private static async Task<IResult> GetAsync(string id, IRepository<SampleItem, SimpleContainer> repository)
     {
-        var item = await repository.GetAsync(id, () => new PartitionKey(id));
+        var item = await repository.GetAsync(id, new PartitionKey(id));
         return item is not null ? Results.Ok(item) : Results.NotFound();
     }
 
     private static async Task<IResult> CreateAsync(SampleItem item, IRepository<SampleItem, SimpleContainer> repository)
     {
-        await repository.CreateAsync(item, () => new PartitionKey(item.Id));
+        await repository.CreateAsync(item, new PartitionKey(item.Id));
         return Results.Created($"/simple-container/{item.Id}", item);
     }
 
     private static  async Task<IResult> UpdateAsync(SampleItem item, IRepository<SampleItem, SimpleContainer> repository)
     {
-        await repository.UpsertAsync(item, () => new PartitionKey(item.Id), item.Etag!);
+        await repository.UpsertAsync(item, new PartitionKey(item.Id), item.Etag!);
         return Results.Ok(item);
     }
 
     private static async Task<IResult> DeleteAsync(string id, IRepository<SampleItem, SimpleContainer> repository)
     {
-        await repository.DeleteAsync(id, () => new PartitionKey(id));
+        await repository.DeleteAsync(id, new PartitionKey(id));
         return Results.NoContent();
     }
 }

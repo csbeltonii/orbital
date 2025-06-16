@@ -32,7 +32,7 @@ public static class OrganizationItemEndpoints
     {
         var item = await repository.GetAsync(
             id,
-            partitionKeyFactory: () => BuildPartitionKey(orgId, id)
+            BuildPartitionKey(orgId, id)
         );
 
         return item is not null ? Results.Ok(item) : Results.NotFound();
@@ -44,7 +44,7 @@ public static class OrganizationItemEndpoints
     {
         await repository.CreateAsync(
             item,
-            partitionKeyFactory: () => BuildPartitionKey(item.OrgId, item.Id)
+            BuildPartitionKey(item.OrgId, item.Id)
         );
 
         return Results.Created($"/organization-item/{item.Id}?orgId={item.OrgId}", item);
@@ -56,7 +56,7 @@ public static class OrganizationItemEndpoints
     {
         await repository.UpsertAsync(
             item, 
-            partitionKeyFactory: () => BuildPartitionKey(item.OrgId, item.Id),
+            BuildPartitionKey(item.OrgId, item.Id),
             item.Etag);
 
         return Results.Ok(item);
@@ -67,7 +67,7 @@ public static class OrganizationItemEndpoints
         string orgId,
         IRepository<OrganizationItem, HierarchicalContainer> repository)
     {
-        await repository.DeleteAsync(id, () => BuildPartitionKey(orgId, id));
+        await repository.DeleteAsync(id, BuildPartitionKey(orgId, id));
         return Results.NoContent();
     }
 }

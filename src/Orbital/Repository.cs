@@ -15,12 +15,10 @@ public class Repository<TEntity, TContainer>(
 {
     private readonly Container Container = cosmosContainerAccessor.Container;
 
-    public async Task<TEntity?> CreateAsync(TEntity entity, Func<PartitionKey> partitionKeyFactory, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> CreateAsync(TEntity entity, PartitionKey partitionKey, CancellationToken cancellationToken = default)
     {
         try
         {
-            var partitionKey = partitionKeyFactory.Invoke();
-
             var response = await Container
                 .CreateItemAsync(entity, partitionKey, cancellationToken: cancellationToken);
 
@@ -47,12 +45,10 @@ public class Repository<TEntity, TContainer>(
         }
     }
 
-    public async Task<TEntity?> GetAsync(string id, Func<PartitionKey> partitionKeyFactory, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetAsync(string id, PartitionKey partitionKey, CancellationToken cancellationToken = default)
     {
         try
         {
-            var partitionKey = partitionKeyFactory.Invoke();
-
             var response = await Container.ReadItemAsync<TEntity>(
                 id,
                 partitionKey,
@@ -81,8 +77,8 @@ public class Repository<TEntity, TContainer>(
     }
 
     public async Task<TEntity?> UpsertAsync(
-        TEntity entity, 
-        Func<PartitionKey> partitionKeyFactory,
+        TEntity entity,
+        PartitionKey partitionKey,
         string? etag = null,
         CancellationToken cancellationToken = default)
     {
@@ -94,8 +90,6 @@ public class Repository<TEntity, TContainer>(
                 {
                     IfMatchEtag = etag
                 };
-
-            var partitionKey = partitionKeyFactory.Invoke();
 
             var response = await Container.UpsertItemAsync(
                 entity,
@@ -147,10 +141,9 @@ public class Repository<TEntity, TContainer>(
         }
     }
 
-    public async Task<bool> DeleteAsync(string id, Func<PartitionKey> partitionKeyFactory, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteAsync(string id, PartitionKey partitionKey, CancellationToken cancellationToken = default)
     {
         var stopwatch = Stopwatch.StartNew();
-        var partitionKey = partitionKeyFactory.Invoke();
 
         try
         {

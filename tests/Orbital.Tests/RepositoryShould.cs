@@ -33,7 +33,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
             {
                 Id = expectedTestDocumentId
             },
-            () => new PartitionKeyBuilder().Add(expectedTestDocumentId).Build()
+            new PartitionKeyBuilder().Add(expectedTestDocumentId).Build()
         ];
 
         yield return [
@@ -52,7 +52,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
                 Id = expectedTestDocumentId,
                 OrgId = "org1"
             },
-            () => new PartitionKeyBuilder().Add("org1").Add(expectedTestDocumentId).Build()
+            new PartitionKeyBuilder().Add("org1").Add(expectedTestDocumentId).Build()
         ];
     }
 
@@ -62,7 +62,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         Type entityType,
         ContainerProperties containerProperties,
         IEntity entity,
-        Func<PartitionKey> partitionKeyFactory)
+        PartitionKey partitionKey)
     {
         var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
         await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
@@ -75,13 +75,13 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
                                 BindingFlags.NonPublic | BindingFlags.Instance)!
                      .MakeGenericMethod(entityType);
 
-        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKeyFactory])!;
+        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKey])!;
     }
 
     private async Task ExecuteCreateAndRetrieveTest<TEntity>(
         ContainerAccessorStub accessor,
         IEntity entity,
-        Func<PartitionKey> partitionKeyFactory)
+        PartitionKey partitionKey)
         where TEntity : class, IEntity
     {
         // arrange
@@ -89,8 +89,8 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         var sut = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
 
         // act
-        await sut.CreateAsync((TEntity)entity, partitionKeyFactory);
-        var result = await sut.GetAsync(entity.Id, partitionKeyFactory);
+        await sut.CreateAsync((TEntity)entity, partitionKey);
+        var result = await sut.GetAsync(entity.Id, partitionKey);
 
         // assert
         Assert.NotNull(result);
@@ -118,17 +118,17 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
             Name = "test"
         };
 
-        var partitionKeyFactory = () => new PartitionKeyBuilder().Add(testDocument.Id).Build();
+        var partitionKey = new PartitionKeyBuilder().Add(testDocument.Id).Build();
 
 
         // act
-        var createdResponse = await sut.CreateAsync(testDocument, partitionKeyFactory);
+        var createdResponse = await sut.CreateAsync(testDocument, partitionKey);
 
         createdResponse!.Name = expectedName;
 
-        await sut.UpsertAsync(createdResponse, partitionKeyFactory);
+        await sut.UpsertAsync(createdResponse, partitionKey);
 
-        var result = await sut.GetAsync(testDocument.Id, partitionKeyFactory);
+        var result = await sut.GetAsync(testDocument.Id, partitionKey);
 
         // assert
         Assert.NotNull(result);
@@ -158,19 +158,19 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
             Name = "test"
         };
 
-        var partitionKeyFactory = () => new PartitionKeyBuilder()
+        var partitionKey = new PartitionKeyBuilder()
                                         .Add(testDocument.OrgId)
                                         .Add(testDocument.Id)
                                         .Build();
 
         // act
-        var createdResponse = await sut.CreateAsync(testDocument, partitionKeyFactory);
+        var createdResponse = await sut.CreateAsync(testDocument, partitionKey);
 
         createdResponse!.Name = expectedName;
 
-        await sut.UpsertAsync(createdResponse, partitionKeyFactory);
+        await sut.UpsertAsync(createdResponse, partitionKey);
 
-        var result = await sut.GetAsync(testDocument.Id, partitionKeyFactory);
+        var result = await sut.GetAsync(testDocument.Id, partitionKey);
 
         // assert
         Assert.NotNull(result);
@@ -184,7 +184,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         Type entityType,
         ContainerProperties containerProperties,
         IEntity entity,
-        Func<PartitionKey> partitionKeyFactory)
+        PartitionKey partitionKey)
     {
         var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
         await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
@@ -196,13 +196,13 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
                      .GetMethod(nameof(ExecuteCreateAndDeleteTest), BindingFlags.NonPublic | BindingFlags.Instance)!
                      .MakeGenericMethod(entityType);
 
-        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKeyFactory])!;
+        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKey])!;
     }
 
     private async Task ExecuteCreateAndDeleteTest<TEntity>(
         ContainerAccessorStub accessor,
         IEntity entity,
-        Func<PartitionKey> partitionKeyFactory)
+        PartitionKey partitionKey)
         where TEntity : class, IEntity
     {
         // arrange
@@ -210,9 +210,9 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         var sut = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
 
         // act
-        var createResponse = await sut.CreateAsync((TEntity)entity, partitionKeyFactory);
-        await sut.DeleteAsync(createResponse!.Id, partitionKeyFactory);
-        var result = await sut.GetAsync(entity.Id, partitionKeyFactory);
+        var createResponse = await sut.CreateAsync((TEntity)entity, partitionKey);
+        await sut.DeleteAsync(createResponse!.Id, partitionKey);
+        var result = await sut.GetAsync(entity.Id, partitionKey);
         
         // assert
         Assert.Null(result);
@@ -224,7 +224,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         Type entityType,
         ContainerProperties containerProperties,
         IEntity entity,
-        Func<PartitionKey> partitionKeyFactory)
+        PartitionKey partitionKey)
     {
         var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
         await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
@@ -236,13 +236,13 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
                      .GetMethod(nameof(ExecutePreventConflictsTest), BindingFlags.NonPublic | BindingFlags.Instance)!
                      .MakeGenericMethod(entityType);
 
-        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKeyFactory])!;
+        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKey])!;
     }
 
     private async Task ExecutePreventConflictsTest<TEntity>(
         ContainerAccessorStub accessor,
         IEntity entity,
-        Func<PartitionKey> partitionKeyFactory)
+        PartitionKey partitionKey)
         where TEntity : class, IEntity
     {
         // arrange
@@ -250,8 +250,8 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         var sut = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
 
         // act
-        var firstResponse = await sut.CreateAsync((TEntity)entity, partitionKeyFactory);
-        var secondResponse = await sut.CreateAsync((TEntity) entity, partitionKeyFactory);
+        var firstResponse = await sut.CreateAsync((TEntity)entity, partitionKey);
+        var secondResponse = await sut.CreateAsync((TEntity) entity, partitionKey);
 
         // assert
         Assert.NotNull(firstResponse);
@@ -265,7 +265,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         Type entityType,
         ContainerProperties containerProperties,
         IEntity entity,
-        Func<PartitionKey> partitionKeyFactory)
+        PartitionKey partitionKey)
     {
         var db = await _client.CreateDatabaseIfNotExistsAsync(_dbName);
         await db.Database.CreateContainerIfNotExistsAsync(containerProperties);
@@ -277,13 +277,13 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
                      .GetMethod(nameof(ExecuteProvideEtagConsistencyTest), BindingFlags.NonPublic | BindingFlags.Instance)!
                      .MakeGenericMethod(entityType);
 
-        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKeyFactory])!;
+        await (Task)method.Invoke(this, [containerAccessor, entity, partitionKey])!;
     }
 
     private async Task ExecuteProvideEtagConsistencyTest<TEntity>(
         ContainerAccessorStub accessor,
         IEntity entity,
-        Func<PartitionKey> partitionKeyFactory)
+        PartitionKey partitionKey)
         where TEntity : class, IEntity
     {
         // arrange
@@ -291,11 +291,11 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         var sut = new Repository<TEntity, ContainerAccessorStub>(accessor, logger.Object);
 
         // act
-        var initialResponse = await sut.CreateAsync((TEntity) entity, partitionKeyFactory);
-        var conflictingResponse = await sut.GetAsync(entity.Id, partitionKeyFactory);
+        var initialResponse = await sut.CreateAsync((TEntity) entity, partitionKey);
+        var conflictingResponse = await sut.GetAsync(entity.Id, partitionKey);
 
-        var successfulUpdate = await sut.UpsertAsync(initialResponse!, partitionKeyFactory, initialResponse!.Etag);
-        var failedUpdate = await sut.UpsertAsync(conflictingResponse!, partitionKeyFactory, conflictingResponse!.Etag);
+        var successfulUpdate = await sut.UpsertAsync(initialResponse!, partitionKey, initialResponse!.Etag);
+        var failedUpdate = await sut.UpsertAsync(conflictingResponse!, partitionKey, conflictingResponse!.Etag);
 
         // assert
         Assert.NotNull(successfulUpdate);
