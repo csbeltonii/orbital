@@ -37,7 +37,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
         ];
 
         yield return [
-            typeof(TestHierarchicalDocument),
+            typeof(OrganizationDocument),
             new ContainerProperties
             {
                 Id = Guid.NewGuid().ToString(),
@@ -47,7 +47,7 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
                     "/id"
                 ]
             },
-            new TestHierarchicalDocument("user")
+            new OrganizationDocument("user")
             {
                 Id = expectedTestDocumentId,
                 OrgId = "org1"
@@ -148,10 +148,10 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
 
         var settings = new OrbitalContainerConfigurationStub(_dbName, containerProperties.Id);
         var containerAccessor = new ContainerAccessorStub(_client, settings);
-        var logger = new Mock<ILogger<Repository<TestHierarchicalDocument, ContainerAccessorStub>>>();
-        var sut = new Repository<TestHierarchicalDocument, ContainerAccessorStub>(containerAccessor, logger.Object);
+        var logger = new Mock<ILogger<Repository<OrganizationDocument, ContainerAccessorStub>>>();
+        var sut = new Repository<OrganizationDocument, ContainerAccessorStub>(containerAccessor, logger.Object);
 
-        var testDocument = new TestHierarchicalDocument("user")
+        var testDocument = new OrganizationDocument("user")
         {
             Id = "1",
             OrgId = "org1",

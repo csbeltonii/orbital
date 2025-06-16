@@ -81,7 +81,7 @@ public class BulkRepository<TEntity, TContainer>(
                             itemResponse.Diagnostics
                         );
 
-                        succeeded.Add((entity, itemResponse.RequestCharge));
+                        succeeded.Add((itemResponse, itemResponse.RequestCharge));
                     }
                     catch (Exception ex)
                     {
@@ -146,7 +146,7 @@ public class BulkRepository<TEntity, TContainer>(
                             itemResponse.Diagnostics
                         );
 
-                        succeeded.Add(new BulkOperationSuccess<TEntity>(entity, itemResponse.RequestCharge));
+                        succeeded.Add(new BulkOperationSuccess<TEntity>(itemResponse, itemResponse.RequestCharge));
                     }
                     catch (Exception ex)
                     {
@@ -173,6 +173,7 @@ public class BulkRepository<TEntity, TContainer>(
             TotalRequestUnits = succeeded.Sum(result => result.RequestCharge)
         };
     }
+
     public async Task<BulkOperationResult<TEntity>> BulkDeleteAsync(
         IEnumerable<string> ids,
         PartitionKey partitionKey,
