@@ -11,7 +11,6 @@ internal static class LoggerExtensions
                                      string typeName,
                                      string partitionKey,
                                      HttpStatusCode statusCode,
-                                     long elapsedMs,
                                      double requestCharge, 
                                      CosmosDiagnostics cosmosDiagnostics) =>
         logger.LogInformation(
@@ -20,7 +19,7 @@ internal static class LoggerExtensions
             typeName, 
             partitionKey, 
             statusCode, 
-            elapsedMs, 
+            cosmosDiagnostics.GetClientElapsedTime().TotalMilliseconds, 
             requestCharge, 
             cosmosDiagnostics.GetFailedRequestCount()
         );
@@ -30,7 +29,6 @@ internal static class LoggerExtensions
                                      string typeName,
                                      string partitionKey,
                                      HttpStatusCode statusCode,
-                                     long elapsedMs,
                                      CosmosDiagnostics cosmosDiagnostics)
     {
         logger.LogInformation(
@@ -39,7 +37,7 @@ internal static class LoggerExtensions
             typeName,
             partitionKey,
             statusCode,
-            elapsedMs,
+            cosmosDiagnostics.GetClientElapsedTime().TotalMilliseconds,
             cosmosDiagnostics.GetFailedRequestCount()
         );
     }

@@ -19,7 +19,6 @@ public class Repository<TEntity, TContainer>(
     {
         try
         {
-            var stopwatch = Stopwatch.StartNew();
             var partitionKey = partitionKeyFactory.Invoke();
 
             var response = await Container
@@ -30,7 +29,6 @@ public class Repository<TEntity, TContainer>(
                 typeof(TEntity).Name,
                 partitionKey.ToString(),
                 response.StatusCode,
-                stopwatch.ElapsedMilliseconds,
                 response.RequestCharge,
                 response.Diagnostics
             );
@@ -51,8 +49,6 @@ public class Repository<TEntity, TContainer>(
 
     public async Task<TEntity?> GetAsync(string id, Func<PartitionKey> partitionKeyFactory, CancellationToken cancellationToken = default)
     {
-        var stopwatch = Stopwatch.StartNew();
-
         try
         {
             var partitionKey = partitionKeyFactory.Invoke();
@@ -67,7 +63,6 @@ public class Repository<TEntity, TContainer>(
                 typeof(TEntity).Name,
                 partitionKey.ToString(),
                 response.StatusCode,
-                stopwatch.ElapsedMilliseconds,
                 response.RequestCharge,
                 response.Diagnostics);
 
@@ -91,8 +86,6 @@ public class Repository<TEntity, TContainer>(
         string? etag = null,
         CancellationToken cancellationToken = default)
     {
-        var stopwatch = Stopwatch.StartNew();
-
         try
         {
             var options = etag is null 
@@ -116,7 +109,6 @@ public class Repository<TEntity, TContainer>(
                 typeof(TEntity).Name,
                 partitionKey.ToString(),
                 response.StatusCode,
-                stopwatch.ElapsedMilliseconds,
                 response.RequestCharge,
                 response.Diagnostics
             );
@@ -173,7 +165,6 @@ public class Repository<TEntity, TContainer>(
                 typeof(TEntity).Name,
                 partitionKey.ToString(),
                 response.StatusCode,
-                stopwatch.ElapsedMilliseconds,
                 response.RequestCharge,
                 response.Diagnostics
             );
