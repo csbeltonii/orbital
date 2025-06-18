@@ -18,25 +18,25 @@ public static class SampleItemEndpoints
         return group;
     }
 
-    private static async Task<IResult> GetAsync(string id, IRepository<SampleItem, SimpleContainer> repository)
+    private static async Task<IResult> GetAsync(string id, IRepository<SampleItem, ISimpleContainer> repository)
     {
         var item = await repository.GetAsync(id, new PartitionKey(id));
         return item is not null ? Results.Ok(item) : Results.NotFound();
     }
 
-    private static async Task<IResult> CreateAsync(SampleItem item, IRepository<SampleItem, SimpleContainer> repository)
+    private static async Task<IResult> CreateAsync(SampleItem item, IRepository<SampleItem, ISimpleContainer> repository)
     {
         await repository.CreateAsync(item, new PartitionKey(item.Id));
         return Results.Created($"/simple-container/{item.Id}", item);
     }
 
-    private static  async Task<IResult> UpdateAsync(SampleItem item, IRepository<SampleItem, SimpleContainer> repository)
+    private static  async Task<IResult> UpdateAsync(SampleItem item, IRepository<SampleItem, ISimpleContainer> repository)
     {
         await repository.UpsertAsync(item, new PartitionKey(item.Id), item.Etag!);
         return Results.Ok(item);
     }
 
-    private static async Task<IResult> DeleteAsync(string id, IRepository<SampleItem, SimpleContainer> repository)
+    private static async Task<IResult> DeleteAsync(string id, IRepository<SampleItem, ISimpleContainer> repository)
     {
         await repository.DeleteAsync(id, new PartitionKey(id));
         return Results.NoContent();

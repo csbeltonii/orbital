@@ -50,7 +50,7 @@ services.AddCosmosContainer<RaceEventContainer, RaceEventContainerSettings>(conf
 services.AddSingleton<ICosmosContainerAccessor, RaceEventContainer>();
 ```
 
-ℹ️ Note: You can customize the JSON serializer (see section Customizing the Serializer).
+ℹ️ Note: You can customize the JSON serializer (see[ Customizing the Serializer](#customizing-the-serializer)).
 
 ### 3. Register the repository
 
@@ -128,7 +128,7 @@ public class EnterRaceEventService(IRepository<RaceEvent, IRaceEventContainer> r
 }
 ```
 
-### Multi-Container Setup (Centralized Configuration)
+## Multi-Container Setup (Centralized Configuration)
 
 Use this for larger systems with multiple Cosmos containers.
 
@@ -156,7 +156,13 @@ services.AddCosmosDb(orbitalCosmosOptions =>
 services.AddOrbitalDatabaseSettings(configuration, "DatabaseSettings");
 ```
 
-### 3. Define configuration for your containers
+### 3. Define interfaces for containers
+
+```csharp
+public interface ISimpleContainer : ICosmosContainerAccessor;
+```
+
+### 4. Define configuration for your containers
 
 ```csharp
 public class SimpleContainerConfiguration(IOptions<OrbitalDatabaseConfiguration> orbitalDatabaseConfiguration)
@@ -170,10 +176,19 @@ public class SimpleContainerConfiguration(IOptions<OrbitalDatabaseConfiguration>
 }
 ```
 
-### 4. Register repositories
+### 5. Register repositories
 
 ```csharp
 services.AddCosmosRepositories();
+```
+
+### 6. Use the repository in your services
+
+```csharp
+public class SampleItemService(IRepository<SampleItem, ISimpleContainer> repository)
+{
+    // Your logic here
+}
 ```
 
 ## Customizing the Serializer

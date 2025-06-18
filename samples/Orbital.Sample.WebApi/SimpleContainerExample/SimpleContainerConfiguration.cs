@@ -5,7 +5,7 @@ using Orbital.Interfaces;
 namespace Orbital.Sample.WebApi.SimpleContainerExample;
 
 public class SimpleContainerConfiguration(IOptions<OrbitalDatabaseConfiguration> orbitalDatabaseConfiguration)
-    : IOrbitalContainerConfiguration, ISimpleContainer
+    : IOrbitalContainerConfiguration
 {
     public string DatabaseName { get; set; } = orbitalDatabaseConfiguration.Value.DatabaseName 
                                                ?? throw new ArgumentNullException(nameof(orbitalDatabaseConfiguration));
