@@ -9,6 +9,112 @@ A clean, extensible Cosmos DB repository and container accessor abstraction for 
 - `Orbital.Sample.WebApi`: Example usage
 - `Orbital.Tests`: Integration tests using the Cosmos DB Emulator
 
+# Orbital
+
+Orbital is a lightweight repository abstraction layer for Azure Cosmos DB. It supports repository patterns for scalable and testable access to Cosmos containers, including optional durability via Polly.
+
+---
+
+## Getting Started
+
+This guide shows how to configure Orbital for a **simple microservice** that uses a **single Cosmos DB container**.
+
+---
+
+### 1. Add Configuration
+
+Add your container configuration to `appsettings.json`:
+
+```json
+"RaceEventContainerSettings": {
+  "DatabaseName": "trakr-data",
+  "ContainerName": "race-events"
+}
+```
+
+### 2. Register Services in DI
+
+```csharp
+// Register the container
+services.AddCosmosContainer<RaceEventContainer, RaceEventContainerSettings>(configuration, "RaceEventContainerSettings");
+
+// Register the container accessor
+services.AddSingleton<ICosmosContainerAccessor, RaceEventContainer>();
+```
+
+### 3. Register the repository
+
+You have two options:
+
+For a single type:
+```csharp
+services.AddSingleton<IRepository<RaceEvent, ICosmosContainerAccessor>, Repository<RaceEvent, ICosmosContainerAccessor>>();
+```
+
+For multiple document types in a single container:
+```csharp
+services.AddSingleton<IRepository<RaceEvent, ICosmosContainerAccessor>, Repository<RaceEvent, ICosmosContainerAccessor>>();
+```
+
+### 4. Define your document
+
+Only the IEntity interface is required to use repositories:
+
+```csharp
+public interface IEntity
+{
+    string Id { get; set; }
+    string? Etag { get; set; }
+}
+```
+
+Orbital provides an abstract Entity base class with auditing support via SystemInformation.
+
+```csharp
+public abstract class Entity(string userId) : SystemInformation(userId), IEntity
+{
+    public abstract string DocumentType { get; }
+
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+
+    [JsonPropertyName("_etag")]
+    [JsonProperty("_etag")]
+    public string? Etag { get; set; }
+}
+```
+
+Basic auditing is provided via:
+```csharp
+public class SystemInformation : IAudit
+{
+    public SystemInformation() => CreatedBy = string.Empty;
+    public SystemInformation(string userId) => CreatedBy = userId;
+
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public string CreatedBy { get; set; }
+    public DateTime LastUpdated { get; set; }
+    public string? UpdatedBy { get; set; }
+    public int SchemaVersion { get; set; }
+
+    public void UpdateSystemInformation(string updatedBy)
+    {
+        UpdatedBy = updatedBy;
+        LastUpdated = DateTime.UtcNow;
+    }
+}
+```
+
+### 5. Use the repository in your services
+
+Follow standard DI practices:
+
+```csharp
+public class EnterRaceEventService(IRepository<RaceEvent, IRaceEventContainer> raceEventRepository)
+{
+    // Your logic here
+}
+```
+
 ## 🚀 Cosmos Serializer Benchmark Results (Orbital)
 
 Benchmarks measured Cosmos DB performance using **System.Text.Json (STJ)** and **Newtonsoft.Json (NSJ)** serializers with various document sizes and workloads.
