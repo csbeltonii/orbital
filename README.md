@@ -10,7 +10,7 @@ Orbital is a lightweight repository abstraction layer for Azure Cosmos DB. It su
 - `Orbital`: Core interfaces and base abstractions
 - `Orbital.Extensions.DependencyInjection`: DI helpers
 - `Orbital.Sample.WebApi`: Example usage
-- `Orbital.Tests`: Integration tests using the Testcontainers
+- `Orbital.Tests`: Integration tests using Testcontainers
 - `Orbital.Benchmarks`: Benchmark tests using the Cosmos DB Emulator
 
 ---
