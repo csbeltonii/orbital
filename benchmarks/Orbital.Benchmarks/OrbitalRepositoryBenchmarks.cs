@@ -10,7 +10,7 @@ namespace Orbital.Benchmarks;
 public class OrbitalRepositoryBenchmarks
 {
     private IServiceProvider? _stjServiceProvider;
-    private IServiceProvider? _nsjProvider;
+    private IServiceProvider? _nsjServiceProvider;
 
     private const string EmulatorConnectionString =
         "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
@@ -19,7 +19,7 @@ public class OrbitalRepositoryBenchmarks
     public async Task Setup()
     {
         _stjServiceProvider = BuildServiceProvider(OrbitalSerializerType.SystemTextJson);
-        _nsjProvider = BuildServiceProvider(OrbitalSerializerType.NewtonsoftJson);
+        _nsjServiceProvider = BuildServiceProvider(OrbitalSerializerType.NewtonsoftJson);
 
         await SetupDatabaseAsync();
     }
@@ -28,35 +28,31 @@ public class OrbitalRepositoryBenchmarks
     {
         var cosmosClient = new CosmosClient(EmulatorConnectionString);
 
-        var createDatabaseResponse = await cosmosClient.CreateDatabaseIfNotExistsAsync("benchmark-db");
+        var createDatabaseResponse =
+            await cosmosClient.CreateDatabaseIfNotExistsAsync(BenchmarkConstants.BenchmarkDatabaseName);
 
         _ = await createDatabaseResponse.Database.CreateContainerIfNotExistsAsync(
             new ContainerProperties(
-                "benchmark-container",
-                "/id"
+                BenchmarkConstants.BenchmarkContainerName,
+                BenchmarkConstants.BenchmarkPartitionKey
             )
         );
     }
 
-    private static IServiceProvider BuildServiceProvider(OrbitalSerializerType serializerType)
-    {
-        var services = new ServiceCollection();
-
-        services.AddCosmosDb(
-                    options =>
-                    {
-                        options.SerializerType = serializerType;
-                        options.OverrideConnectionString = EmulatorConnectionString;
-                    }
-                )
-                .AddCosmosRepositories()
-                .AddCosmosBulkRepositories()
-                .AddSingleton<IOrbitalContainerConfiguration>(new BenchmarkDocumentContainerConfiguration())
-                .AddSingleton<BenchmarkDocumentContainerAccessor>()
-                .AddLogging();
-
-        return services.BuildServiceProvider();
-    }
+    private static ServiceProvider BuildServiceProvider(OrbitalSerializerType serializerType) =>
+        new ServiceCollection()
+            .AddCosmosDb(
+                options => 
+                { 
+                    options.SerializerType = serializerType; 
+                    options.OverrideConnectionString = EmulatorConnectionString;
+                })
+            .AddCosmosRepositories()
+            .AddCosmosBulkRepositories()
+            .AddSingleton<IOrbitalContainerConfiguration>(new BenchmarkDocumentContainerConfiguration())
+            .AddSingleton<BenchmarkDocumentContainerAccessor>()
+            .AddLogging()
+            .BuildServiceProvider();
 
     [Benchmark]
     public async Task CreateAndReadBenchmark_STJSerializer()
@@ -72,7 +68,7 @@ public class OrbitalRepositoryBenchmarks
     [Benchmark]
     public async Task CreateAndReadBenchmark_NSJSerializer()
     {
-        var repository = _nsjProvider!
+        var repository = _nsjServiceProvider!
             .GetRequiredService<IRepository<BenchmarkDocument, BenchmarkDocumentContainerAccessor>>();
         var document = new BenchmarkDocument("user");
 
@@ -93,7 +89,7 @@ public class OrbitalRepositoryBenchmarks
     [Benchmark]
     public async Task CreateLargeDocument_NSJ()
     {
-        var repository = _nsjProvider!.GetRequiredService<IRepository<LargeDocument, BenchmarkDocumentContainerAccessor>>();
+        var repository = _nsjServiceProvider!.GetRequiredService<IRepository<LargeDocument, BenchmarkDocumentContainerAccessor>>();
         var document = new LargeDocument("user");
 
         await repository.CreateAsync(document, new PartitionKey(document.Id));
@@ -114,7 +110,7 @@ public class OrbitalRepositoryBenchmarks
     [Benchmark]
     public async Task BulkCreate_NSJ()
     {
-        var bulkRepository = _nsjProvider!.GetRequiredService<IBulkRepository<LargeDocument, BenchmarkDocumentContainerAccessor>>();
+        var bulkRepository = _nsjServiceProvider!.GetRequiredService<IBulkRepository<LargeDocument, BenchmarkDocumentContainerAccessor>>();
         var documents = GenerateDocuments(count: 100);
         var partitionKey = new PartitionKey(documents[0].Id);
 
@@ -149,7 +145,7 @@ public class OrbitalRepositoryBenchmarks
     [Benchmark]
     public async Task BulkUpsert_NSJ()
     {
-        var repo = _nsjProvider!.GetRequiredService<IBulkRepository<LargeDocument, BenchmarkDocumentContainerAccessor>>();
+        var repo = _nsjServiceProvider!.GetRequiredService<IBulkRepository<LargeDocument, BenchmarkDocumentContainerAccessor>>();
         var documents = GenerateDocuments(100);
 
         var partitionKey = new PartitionKey(documents[0].Id);
