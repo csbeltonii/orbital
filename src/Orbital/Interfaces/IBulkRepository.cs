@@ -3,8 +3,9 @@ using Orbital.Models;
 
 namespace Orbital.Interfaces;
 
-public interface IBulkRepository<TEntity>
+public interface IBulkRepository<TEntity, TContainer>
     where TEntity : class, IEntity
+    where TContainer : class, ICosmosContainerAccessor
 {
     Task<IEnumerable<TEntity>> ReadPartitionAsync(
         IEnumerable<string> ids,

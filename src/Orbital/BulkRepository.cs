@@ -9,7 +9,7 @@ namespace Orbital;
 public class BulkRepository<TEntity, TContainer>(
     TContainer cosmosContainerAccessor, 
     ILogger<BulkRepository<TEntity, TContainer>> logger)
-    : IBulkRepository<TEntity>
+    : IBulkRepository<TEntity, TContainer>
     where TEntity : class, IEntity
     where TContainer : class, ICosmosContainerAccessor
 {

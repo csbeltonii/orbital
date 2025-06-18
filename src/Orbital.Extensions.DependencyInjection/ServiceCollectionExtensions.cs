@@ -90,6 +90,8 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services) =>
         services.AddSingleton(typeof(IRepository<,>), typeof(Repository<,>));
 
+    public static IServiceCollection AddCosmosBulkRepositories(this IServiceCollection services) =>
+        services.AddSingleton(typeof(IBulkRepository<,>), typeof(BulkRepository<,>));
 
     private static JsonSerializerOptions BuildSystemTextJsonOptions(IEnumerable<JsonConverter> converters)
     {
