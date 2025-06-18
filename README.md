@@ -15,13 +15,13 @@ Benchmarks measured Cosmos DB performance using **System.Text.Json (STJ)** and *
 
 ---
 
-### 🖥️ Benchmark Environment
+## 📊 Benchmark Environment
 
-BenchmarkDotNet v0.15.2
-OS: Windows 11 (10.0.26100.4349) [24H2]
-CPU: 11th Gen Intel Core i7-1165G7 2.80GHz (8 logical, 4 physical cores)
-.NET SDK: 9.0.201
-Runtime: .NET 9.0.3 (RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI)
+**BenchmarkDotNet** `v0.15.2`  
+**OS**: Windows 11 (`10.0.26100.4349`) [24H2]  
+**CPU**: 11th Gen Intel Core i7-1165G7 @ 2.80GHz (8 logical, 4 physical cores)  
+**.NET SDK**: `9.0.201`  
+**Runtime**: .NET 9.0.3 (RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI)
 
 ---
 
