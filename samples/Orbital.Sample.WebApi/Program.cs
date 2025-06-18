@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Azure.Cosmos;
 using Orbital.Extensions.DependencyInjection;
 using Orbital.Sample.WebApi;
@@ -19,6 +20,11 @@ builder.Services
        {
            orbitalCosmosOptions.Configuration = configuration;
            orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
+
+           orbitalCosmosOptions.SystemTextJsonOptions = new JsonSerializerOptions
+           {
+               PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+           };
        })
        .AddCosmosRepositories();
 
