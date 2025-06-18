@@ -6,52 +6,8 @@ using Orbital.Interfaces;
 
 namespace Orbital.Benchmarks;
 
-public class BenchmarkDocument(string userId) : Entity(userId)
-{
-    
-    public BenchmarkDocument() : this(string.Empty) { }
-    public override string DocumentType => "non-hierarchical-benchmark-document";
-}
-
-public class BenchmarkHierarchicalDocument(string userId) : Entity(userId)
-{
-    public BenchmarkHierarchicalDocument() : this(string.Empty) { }
-
-    public string OrgId { get; set; }
-    public override string DocumentType => "hierarchical-benchmark-document";
-}
-
-public class LargeDocument(string userId) : Entity(userId)
-{
-    public LargeDocument() : this(string.Empty) { }
-
-    public override string DocumentType => "large-document";
-
-    public List<ChildItem> Items { get; set; } = Enumerable.Range(0, 1000)
-                                                           .Select(i => new ChildItem { Value = $"Value {i}", Count = i })
-                                                           .ToList();
-}
-
-public class ChildItem
-{
-    public string? Value { get; set; }
-    public int Count { get; set; }
-}
-
-
-public class BenchmarkDocumentContainerAccessor(
-    CosmosClient cosmosClient, 
-    IOrbitalContainerConfiguration containerSettings) 
-    : BaseContainerAccessor(cosmosClient, containerSettings);
-
-public class BenchmarkDocumentContainerConfiguration : IOrbitalContainerConfiguration
-{
-    public string DatabaseName { get; set; } = "benchmark-db";
-    public string ContainerName { get; set; } = "benchmark-container";
-}
-
 [MemoryDiagnoser]
-public class RepositoryBenchmarks
+public class OrbitalRepositoryBenchmarks
 {
     private IServiceProvider? _stjServiceProvider;
     private IServiceProvider? _nsjProvider;

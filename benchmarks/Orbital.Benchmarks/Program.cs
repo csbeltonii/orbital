@@ -1,4 +1,4 @@
 ﻿using BenchmarkDotNet.Running;
 using Orbital.Benchmarks;
 
-BenchmarkRunner.Run<RepositoryBenchmarks>();
+BenchmarkRunner.Run<OrbitalRepositoryBenchmarks>();
