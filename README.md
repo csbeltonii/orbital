@@ -1,6 +1,9 @@
-﻿# Orbital
+﻿![Build](https://github.com/<your-username>/<your-repo>/actions/workflows/build.yml/badge.svg)
 
-A clean, extensible Cosmos DB repository and container accessor abstraction for .NET.
+
+# Orbital
+
+Orbital is a lightweight repository abstraction layer for Azure Cosmos DB. It supports repository patterns for scalable and testable access to Cosmos containers, including optional durability via Polly.
 
 ## Projects
 
@@ -9,10 +12,6 @@ A clean, extensible Cosmos DB repository and container accessor abstraction for 
 - `Orbital.Sample.WebApi`: Example usage
 - `Orbital.Tests`: Integration tests using the Testcontainers
 - `Orbital.Benchmarks`: Benchmark tests using the Cosmos DB Emulator
-
-# Orbital
-
-Orbital is a lightweight repository abstraction layer for Azure Cosmos DB. It supports repository patterns for scalable and testable access to Cosmos containers, including optional durability via Polly.
 
 ---
 
@@ -70,7 +69,7 @@ services.AddSingleton<IRepository<RaceEvent, ICosmosContainerAccessor>, Reposito
 
 ### 4. Define your document
 
-Only the IEntity interface is required to use repositories:
+Only the `IEntity` interface is required to use repositories:
 
 ```csharp
 public interface IEntity
@@ -80,7 +79,7 @@ public interface IEntity
 }
 ```
 
-Orbital provides an abstract Entity base class with auditing support via SystemInformation.
+Orbital provides an abstract `Entity` base class with auditing support via SystemInformation.
 
 ```csharp
 public abstract class Entity(string userId) : SystemInformation(userId), IEntity
@@ -94,8 +93,6 @@ public abstract class Entity(string userId) : SystemInformation(userId), IEntity
     public string? Etag { get; set; }
 }
 ```
-
-Basic auditing is provided via:
 
 ```csharp
 public class SystemInformation : IAudit
@@ -192,6 +189,8 @@ public class SampleItemService(IRepository<SampleItem, ISimpleContainer> reposit
 ```
 
 ## Customizing the Serializer
+
+When using the configuration action, you can use the SystemTextJsonOptions and NewtonsoftJsonSettings properties to configure the serializer.
 
 ```csharp
 services.AddCosmosDb(orbitalCosmosOptions =>
