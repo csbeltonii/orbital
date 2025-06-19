@@ -19,9 +19,6 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      - name: 🐳 Pull Cosmos DB Emulator image
-        run: docker pull mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
-
       - name: 📦 Restore dependencies
         run: dotnet restore
 
