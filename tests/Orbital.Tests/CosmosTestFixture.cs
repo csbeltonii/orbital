@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using DotNet.Testcontainers.Builders;
+using Microsoft.Azure.Cosmos;
 using Testcontainers.CosmosDb;
 
 namespace Orbital.Tests;
@@ -15,8 +16,6 @@ public class CosmosTestFixture : IAsyncLifetime
     {
         Container = new CosmosDbBuilder()
                     .WithImage("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
-                    .WithPortBinding(8081, 8081)
-                    .WithPortBinding(10251, 10251)
                     .WithCleanUp(true)
                     .Build();
 
