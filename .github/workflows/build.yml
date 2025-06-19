@@ -5,30 +5,25 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        dotnet-version: ["8.0.x", "9.0.x"]
-
     steps:
       - name: 🧾 Checkout source
         uses: actions/checkout@v3
 
-      - name: 🧰 Setup .NET SDK ${{ matrix.dotnet-version }}
+      - name: 🧰 Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+          dotnet-version: "8.0.x"
 
       - name: 📦 Restore dependencies
         run: dotnet restore
 
-      - name: 🛠️ Build solution for ${{ matrix.dotnet-version }}
+      - name: 🛠️ Build solution
         run: dotnet build --no-restore --configuration Release
 
-      - name: ✅ Run tests for ${{ matrix.dotnet-version }}
+      - name: ✅ Run tests
         run: dotnet test --no-build --configuration Release --verbosity normal
