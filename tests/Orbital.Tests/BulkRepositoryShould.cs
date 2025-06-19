@@ -12,8 +12,8 @@ public class BulkRepositoryShould : IClassFixture<CosmosTestFixture>
 
     public BulkRepositoryShould(CosmosTestFixture cosmosTestFixture)
     {
-        _client = cosmosTestFixture.CosmosClient;
-        _dbName = cosmosTestFixture.DatabaseName;
+        _client = cosmosTestFixture.CosmosClient!;
+        _dbName = CosmosTestFixture.DatabaseName;
     }
 
     public static IEnumerable<object[]> GenericTestData()

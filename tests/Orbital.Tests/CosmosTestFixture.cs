@@ -7,9 +7,9 @@ public class CosmosTestFixture : IAsyncLifetime
 {
     public CosmosDbContainer Container { get; private set; } = null!;
 
-    public CosmosClient CosmosClient { get; private set; }
+    public CosmosClient? CosmosClient { get; private set; }
 
-    public string DatabaseName => "orbital-integration-tests";
+    public static string DatabaseName => "orbital-integration-tests";
 
     public async Task InitializeAsync()
     {

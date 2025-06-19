@@ -14,8 +14,8 @@ public class RepositoryShould : IClassFixture<CosmosTestFixture>
 
     public RepositoryShould(CosmosTestFixture fixture)
     {
-        _client = fixture.CosmosClient;
-        _dbName = fixture.DatabaseName;
+        _client = fixture.CosmosClient!;
+        _dbName = CosmosTestFixture.DatabaseName;
     }
 
     public static IEnumerable<object[]> GenericTestData()
