@@ -15,4 +15,19 @@
     <ProjectReference Include="..\Orbital\Orbital.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <PackageId>Orbital Dependency Injection</PackageId>
+    <Authors>Craig Belton II</Authors>
+    <Company>Black Panther Enterprises</Company>
+    <Description>Dependency injection helper methods for Orbital.</Description>
+    <PackageTags>cosmosdb;repository;nosql;orbital</PackageTags>
+    <RepositoryUrl>https://github.com/csbeltonii/Orbital</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/csbeltonii/Orbital</PackageProjectUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+
 </Project>

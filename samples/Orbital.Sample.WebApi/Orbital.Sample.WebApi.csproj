@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Orbital.Extensions.DependencyInjection\Orbital.Extensions.DependencyInjection.csproj" />
+    <ProjectReference Include="..\..\src\Orbital\Orbital.csproj" />
   </ItemGroup>
+
 
 </Project>

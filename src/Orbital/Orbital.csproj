@@ -6,6 +6,21 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>Orbital</PackageId>
+    <Authors>Craig Belton II</Authors>
+    <Company>Black Panther Enterprises</Company>
+    <Description>Lightweight repository abstraction for Azure Cosmos DB.</Description>
+    <PackageTags>cosmosdb;repository;nosql;orbital</PackageTags>
+    <RepositoryUrl>https://github.com/csbeltonii/Orbital</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/csbeltonii/Orbital</PackageProjectUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.51.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

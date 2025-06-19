@@ -28,24 +28,16 @@ jobs:
       - name: ✅ Test
         run: dotnet test --no-build --configuration Release --verbosity normal
 
-      - name: 📦 Pack
+      - name: 📦 Pack Orbital core
         run: dotnet pack src/Orbital/Orbital.csproj --no-build --configuration Release --output ./nupkgs
 
-      - name: 🧠 Determine version type
-        id: version
-        run: |
-          tag=${GITHUB_REF#refs/tags/}
-          echo "tag=$tag" >> $GITHUB_OUTPUT
-          if [[ "$tag" == *-* ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
-          fi
+      - name: 📦 Pack DI extensions
+        run: dotnet pack src/Orbital.Extensions.DependencyInjection/Orbital.Extensions.DependencyInjection.csproj --no-build --configuration Release --output ./nupkgs
 
       - name: 🚀 Publish to NuGet (stable)
-        if: steps.version.outputs.is_prerelease == 'false'
+        if: ${{ !contains(github.ref, '-') }}
         run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
 
       - name: 🚧 Publish to GitHub Packages (pre-release)
-        if: steps.version.outputs.is_prerelease == 'true'
+        if: ${{ contains(github.ref, '-') }}
         run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json --skip-duplicate
