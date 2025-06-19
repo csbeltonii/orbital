@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <PackageId>Orbital Dependency Injection</PackageId>
+    <PackageId>Orbital.DependencyInjection</PackageId>
     <Authors>Craig Belton II</Authors>
     <Company>Black Panther Enterprises</Company>
     <Description>Dependency injection helper methods for Orbital.</Description>
