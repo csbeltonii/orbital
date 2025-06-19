@@ -1,4 +1,4 @@
-﻿![Build](https://github.com/<your-username>/<your-repo>/actions/workflows/build.yml/badge.svg)
+﻿![Build](https://github.com/csbeltonii/orbital/actions/workflows/build.yml/badge.svg)
 
 
 # Orbital
