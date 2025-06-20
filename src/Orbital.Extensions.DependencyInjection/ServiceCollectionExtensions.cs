@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
         var cosmosConnectionString = options.OverrideConnectionString ?? 
                                      options.Configuration?["CosmosDbConnectionString"] ?? 
-                                     throw new InvalidOperationException("No connection string provided.");
+                                     throw new InvalidOperationException("No Cosmos DB connection string provided. Set 'OverrideConnectionString' or ensure 'CosmosDbConnectionString' exists in configuration.");
 
         CosmosSerializer serializer = options.SerializerType switch
         {
