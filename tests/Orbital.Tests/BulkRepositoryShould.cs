@@ -5,7 +5,8 @@ using Orbital.Interfaces;
 
 namespace Orbital.Tests;
 
-public class BulkRepositoryShould : IClassFixture<CosmosTestFixture>
+[Collection("CosmosDb")]
+public class BulkRepositoryShould
 {
     private readonly CosmosClient _client;
     private readonly string _dbName;

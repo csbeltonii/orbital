@@ -1,5 +1,4 @@
-﻿using DotNet.Testcontainers.Builders;
-using Microsoft.Azure.Cosmos;
+﻿using Microsoft.Azure.Cosmos;
 using Testcontainers.CosmosDb;
 
 namespace Orbital.Tests;
