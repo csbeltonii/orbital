@@ -10,13 +10,11 @@ public class BulkRepositoryShould
 {
     private readonly CosmosClient _client;
     private readonly string _dbName;
-    private CosmosTestFixture _cosmosTestFixture;
 
     public BulkRepositoryShould(CosmosTestFixture cosmosTestFixture)
     {
         _client = cosmosTestFixture.CosmosClient!;
         _dbName = CosmosTestFixture.DatabaseName;
-        _cosmosTestFixture = cosmosTestFixture;
     }
 
     public static IEnumerable<object[]> GenericTestData()
