@@ -35,5 +35,4 @@ jobs:
         run: dotnet pack src/Orbital.Extensions.DependencyInjection/Orbital.Extensions.DependencyInjection.csproj --no-build --configuration Release --output ./nupkgs
 
       - name: 🚀 Publish to NuGet (stable)
-        if: ${{ !contains(github.ref, '-') }}
         run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
