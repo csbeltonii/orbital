@@ -29,7 +29,7 @@ jobs:
         run: dotnet pack src/Orbital/Orbital.csproj --configuration Release --output ./nupkgs
 
       - name: 📦 Pack DI extensions
-        run: dotnet pack src/Orbital.Extensions.DependencyInjection/Orbital.Extensions.DependencyInjection.csproj --no-build --configuration Release --output ./nupkgs
+        run: dotnet pack src/Orbital.Extensions.DependencyInjection/Orbital.Extensions.DependencyInjection.csproj --configuration Release --output ./nupkgs
 
       - name: 🚀 Publish to NuGet (stable)
         run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
