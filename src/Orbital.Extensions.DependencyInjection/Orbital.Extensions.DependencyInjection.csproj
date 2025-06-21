@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <PackageId>Orbital.Extensions.DependencyInjection</PackageId>
+    <PackageId>OrbitalRepositories.Extensions.DependencyInjection</PackageId>
     <Authors>Craig Belton II</Authors>
     <Company>Black Panther Enterprises</Company>
     <Description>Dependency injection helper methods for Orbital.</Description>

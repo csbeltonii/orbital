@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Orbital</PackageId>
+    <PackageId>OrbitalRepositories</PackageId>
     <Authors>Craig Belton II</Authors>
     <Company>Black Panther Enterprises</Company>
     <Description>Lightweight repository abstraction for Azure Cosmos DB.</Description>
