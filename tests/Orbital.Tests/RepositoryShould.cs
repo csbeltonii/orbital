@@ -6,16 +6,18 @@ using Orbital.Interfaces;
 
 namespace Orbital.Tests;
 
-public class RepositoryShould : IClassFixture<CosmosTestFixture>
+[Collection("CosmosDb")]
+public class RepositoryShould
 {
-
+    private readonly CosmosTestFixture _cosmosTestFixture;
     private readonly CosmosClient _client;
     private readonly string _dbName;
 
-    public RepositoryShould(CosmosTestFixture fixture)
+    public RepositoryShould(CosmosTestFixture cosmosTestFixture)
     {
-        _client = fixture.CosmosClient!;
+        _client = cosmosTestFixture.CosmosClient!;
         _dbName = CosmosTestFixture.DatabaseName;
+        _cosmosTestFixture = cosmosTestFixture;
     }
 
     public static IEnumerable<object[]> GenericTestData()
