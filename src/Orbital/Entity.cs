@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 using Newtonsoft.Json;
-using Orbital.Interfaces;
 
 namespace Orbital;
 
-public abstract class Entity(string userId) : SystemInformation(userId), IEntity
+public abstract class Entity(string userId)
 {
     public abstract string DocumentType { get; }
 
@@ -13,4 +12,6 @@ public abstract class Entity(string userId) : SystemInformation(userId), IEntity
     [JsonPropertyName("_etag")]
     [JsonProperty("_etag")]
     public string? Etag { get; set; }
+
+    public SystemInformation SystemInformation { get; set; } = new(userId);
 }
