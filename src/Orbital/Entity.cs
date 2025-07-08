@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using Newtonsoft.Json;
+using Orbital.Interfaces;
 
 namespace Orbital;
 
-public abstract class Entity(string userId)
+public abstract class Entity(string userId) : IEntity
 {
     public abstract string DocumentType { get; }
 
