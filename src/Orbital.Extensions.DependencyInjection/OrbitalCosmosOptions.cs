@@ -38,4 +38,10 @@ public class OrbitalCosmosOptions
     /// Optional override for the Cosmos DB connection string.
     /// </summary>
     public string? OverrideConnectionString { get; set; }
+
+    /// <summary>
+    /// Enables custom retry policies using Polly. When enabled, the Cosmos SDK's built-in retry settings are disabled,
+    /// and repository operations are wrapped using user-defined Polly retry pipelines.
+    /// </summary>
+    public bool UseCustomRetryPolicies { get; set; }
 }

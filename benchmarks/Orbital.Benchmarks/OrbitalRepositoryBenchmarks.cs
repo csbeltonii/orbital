@@ -41,14 +41,12 @@ public class OrbitalRepositoryBenchmarks
 
     private static ServiceProvider BuildServiceProvider(OrbitalSerializerType serializerType) =>
         new ServiceCollection()
-            .AddCosmosDb(
+            .AddOrbitalCosmos(
                 options => 
                 { 
                     options.SerializerType = serializerType; 
                     options.OverrideConnectionString = EmulatorConnectionString;
                 })
-            .AddCosmosRepositories()
-            .AddCosmosBulkRepositories()
             .AddSingleton<IOrbitalContainerConfiguration>(new BenchmarkDocumentContainerConfiguration())
             .AddSingleton<BenchmarkDocumentContainerAccessor>()
             .AddLogging()

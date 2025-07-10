@@ -16,17 +16,18 @@ builder.Services
        .AddSingleton<HierarchicalContainerConfiguration>()
        .AddCosmosContainer<SimpleContainer>()
        .AddCosmosContainer<HierarchicalContainer>()
-       .AddCosmosDb(orbitalCosmosOptions =>
-       {
-           orbitalCosmosOptions.Configuration = configuration;
-           orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
-
-           orbitalCosmosOptions.SystemTextJsonOptions = new JsonSerializerOptions
+       .AddOrbitalCosmos(
+           orbitalCosmosOptions =>
            {
-               PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-           };
-       })
-       .AddCosmosRepositories();
+               orbitalCosmosOptions.Configuration = configuration;
+               orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
+
+               orbitalCosmosOptions.SystemTextJsonOptions = new JsonSerializerOptions
+               {
+                   PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+               };
+           }
+       );
 
 // Add services to the container.
 
