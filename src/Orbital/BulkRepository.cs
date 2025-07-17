@@ -182,7 +182,7 @@ public class BulkRepository<TEntity, TContainer>(
         var succeeded = new ConcurrentBag<BulkOperationSuccess<string>>();
         var errors = new ConcurrentBag<BulkOperationError<TEntity>>();
 
-        var creationTasks = ids
+        var deleteTasks = ids
             .Select(
                 async id =>
                 {
@@ -220,7 +220,7 @@ public class BulkRepository<TEntity, TContainer>(
 
                 });
 
-        await Task.WhenAll(creationTasks);
+        await Task.WhenAll(deleteTasks);
 
         return new BulkOperationResult<TEntity>
         {
