@@ -1,6 +1,5 @@
 ﻿![Build](https://github.com/csbeltonii/orbital/actions/workflows/build.yml/badge.svg)
 
-
 # Orbital
 
 Orbital is a lightweight repository abstraction layer for Azure Cosmos DB. It supports repository patterns for scalable and testable access to Cosmos containers, including optional durability via Polly.
@@ -36,7 +35,7 @@ Add your container configuration to `appsettings.json`:
 
 ```csharp
 // Register Cosmos Client
-services.AddCosmosDb(orbitalCosmosOptions =>
+services.AddOrbitalCosmos(orbitalCosmosOptions =>
 {
     orbitalCosmosOptions.Configuration = configuration;
     orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
@@ -51,23 +50,7 @@ services.AddSingleton<ICosmosContainerAccessor, RaceEventContainer>();
 
 ℹ️ Note: You can customize the JSON serializer (see[ Customizing the Serializer](#customizing-the-serializer)).
 
-### 3. Register the repository
-
-You have two options:
-
-For a single type:
-
-```csharp
-services.AddSingleton<IRepository<RaceEvent, ICosmosContainerAccessor>, Repository<RaceEvent, ICosmosContainerAccessor>>();
-```
-
-For multiple document types in a single container:
-
-```csharp
-services.AddSingleton<IRepository<RaceEvent, ICosmosContainerAccessor>, Repository<RaceEvent, ICosmosContainerAccessor>>();
-```
-
-### 4. Define your document
+### 3. Define your document
 
 Only the `IEntity` interface is required to use repositories:
 
@@ -82,7 +65,7 @@ public interface IEntity
 Orbital provides an abstract `Entity` base class with auditing support via SystemInformation.
 
 ```csharp
-public abstract class Entity(string userId) : SystemInformation(userId), IEntity
+public abstract class Entity(string userId) : IEntity
 {
     public abstract string DocumentType { get; }
 
@@ -91,6 +74,8 @@ public abstract class Entity(string userId) : SystemInformation(userId), IEntity
     [JsonPropertyName("_etag")]
     [JsonProperty("_etag")]
     public string? Etag { get; set; }
+
+    public SystemInformation SystemInformation { get; set; } = new(userId);
 }
 ```
 
@@ -114,7 +99,7 @@ public class SystemInformation : IAudit
 }
 ```
 
-### 5. Use the repository in your services
+### 4. Use the repository in your services
 
 Follow standard DI practices:
 
@@ -144,7 +129,7 @@ Use this for larger systems with multiple Cosmos containers.
 ### 2. Register Cosmos and Database Settings
 
 ```csharp
-services.AddCosmosDb(orbitalCosmosOptions =>
+services.AddOrbitalCosmos(orbitalCosmosOptions =>
 {
     orbitalCosmosOptions.Configuration = configuration;
     orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
@@ -153,7 +138,7 @@ services.AddCosmosDb(orbitalCosmosOptions =>
 services.AddOrbitalDatabaseSettings(configuration, "DatabaseSettings");
 ```
 
-### 3. Define interfaces for containers
+### 3. Define interfaces for containers (Optional)
 
 ```csharp
 public interface ISimpleContainer : ICosmosContainerAccessor;
@@ -173,16 +158,10 @@ public class SimpleContainerConfiguration(IOptions<OrbitalDatabaseConfiguration>
 }
 ```
 
-### 5. Register repositories
+### 5. Use the repository in your services
 
 ```csharp
-services.AddCosmosRepositories();
-```
-
-### 6. Use the repository in your services
-
-```csharp
-public class SampleItemService(IRepository<SampleItem, ISimpleContainer> repository)
+public class SampleItemService(IRepository<SampleItem, SimpleContainer> repository)
 {
     // Your logic here
 }
@@ -193,7 +172,7 @@ public class SampleItemService(IRepository<SampleItem, ISimpleContainer> reposit
 When using the configuration action, you can use the SystemTextJsonOptions and NewtonsoftJsonSettings properties to configure the serializer.
 
 ```csharp
-services.AddCosmosDb(orbitalCosmosOptions =>
+services.AddOrbitalCosmos(orbitalCosmosOptions =>
 {
     orbitalCosmosOptions.Configuration = configuration;
     orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
