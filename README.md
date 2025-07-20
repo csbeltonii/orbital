@@ -193,6 +193,66 @@ services.AddOrbitalCosmos(orbitalCosmosOptions =>
 If you provide serializer options (System.Text.Json or Newtonsoft), then use the Converters property there to register custom converters.
 If you want to use the default options alongside your custom converters, use the properties exposed on the OrbitalCosmosOptions object.
 
+## Use Custom Retry Policies
+
+By default, Orbital uses the **Cosmos SDK's built-in retry settings**, which automatically retry on rate-limiting (HTTP 429) and transient failures.
+
+If you'd like to **use Polly-based custom retry policies**, Orbital supports full integration via `.NET Resilience Pipelines`.
+
+### 🔁 Enabling Polly-Based Retries
+
+To use your own retry logic:
+
+1. Set `UseCustomRetryPolicies = true` in `OrbitalCosmosOptions`.
+2. Register a retry pipeline using `AddOrbitalResiliencePipeline()`.
+3. Optionally, override policies for specific entity types.
+
+```csharp
+services.AddOrbitalCosmos(options =>
+{
+    options.Configuration = configuration;
+    options.UseCustomRetryPolicies = true;
+});
+
+services.AddOrbitalResiliencePipeline(pipeline =>
+{
+    pipeline.AddRetry(new RetryStrategyOptions
+    {
+        ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+        Delay = TimeSpan.FromSeconds(1),
+        MaxRetryAttempts = 3
+    });
+});
+```
+
+### 🧬 Per-Type Retry Overrides
+
+To register a retry policy for a specific document type:
+
+```csharp
+services.AddResiliencePipelineForEntity<RaceEvent>(builder =>
+{
+    builder.AddRetry(new RetryStrategyOptions
+    {
+        MaxRetryAttempts = 5,
+        Delay = TimeSpan.FromMilliseconds(500),
+        UseJitter = true
+    });
+});
+```
+
+### ⚠️ Important:
+
+Setting UseCustomRetryPolicies = true will:
+
+- Disable the Cosmos SDK’s built-in retry behavior by setting:
+
+  - `MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.Zero`
+
+  - `MaxRetryAttemptsOnRateLimitedRequests = 0`
+
+All retry behavior will be handled by your configured Polly pipelines instead.
+
 ## 🚀 Cosmos Serializer Benchmark Results (Orbital)
 
 Benchmarks measured Cosmos DB performance using **System.Text.Json (STJ)** and **Newtonsoft.Json (NSJ)** serializers with various document sizes and workloads.
