@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Microsoft.Azure.Cosmos;
 using Orbital.Extensions.DependencyInjection;
-using Orbital.Sample.WebApi;
-using Orbital.Sample.WebApi.HierarchicalContainerExample;
-using Orbital.Sample.WebApi.SimpleContainerExample;
+using Orbital.Samples.Models;
+using Orbital.Samples.Models.HierarchicalContainerExample;
+using Orbital.Samples.Models.SimpleContainerExample;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -38,6 +38,7 @@ app.MapSampleItemEndpoints();
 app.MapOrganizationItemEndpoints();
 
 app.Run();
+
 return;
 
 async Task InitiateDatabase()

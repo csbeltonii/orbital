@@ -1,5 +1,5 @@
 using Orbital.Interfaces;
 
-namespace Orbital.Sample.WebApi.SimpleContainerExample;
+namespace Orbital.Samples.Models.SimpleContainerExample;
 
 public interface ISimpleContainer : ICosmosContainerAccessor;

@@ -1,8 +1,13 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Orbital.Interfaces;
-using Orbital.Sample.WebApi.SimpleContainerExample;
+using Orbital.Samples.Models.SimpleContainerExample;
 
-namespace Orbital.Sample.WebApi;
+namespace Orbital.Samples.Models;
 
 public static class SampleItemEndpoints
 {
@@ -12,6 +17,7 @@ public static class SampleItemEndpoints
 
         group.MapGet("/{id}", GetAsync).WithName("Get Sample Item");
         group.MapPost("/", CreateAsync).WithName("Create Sample Item");
+        group.MapPost("/{count}", CreateManyAsync).WithName("Create Many Sample Items");
         group.MapPut("/", UpdateAsync).WithName("Update Sample Item");
         group.MapDelete("/{id}", DeleteAsync).WithName("Delete Sample Item");
 
@@ -28,6 +34,22 @@ public static class SampleItemEndpoints
     {
         await repository.CreateAsync(item, new PartitionKey(item.Id));
         return Results.Created($"/simple-container/{item.Id}", item);
+    }
+
+    private static async Task<IResult> CreateManyAsync([FromRoute] int count, IRepository<SampleItem, SimpleContainer> repository)
+    {
+        var tasks = Enumerable.Range(0, count)
+                              .Select(
+                                  _ =>
+                                  {
+                                      var sampleItem = new SampleItem("user", 10);
+                                      return repository.CreateAsync(sampleItem, new PartitionKey(sampleItem.Id));
+                                  }
+                              );
+
+        await Task.WhenAll(tasks);
+
+        return Results.Ok();
     }
 
     private static  async Task<IResult> UpdateAsync(SampleItem item, IRepository<SampleItem, SimpleContainer> repository)

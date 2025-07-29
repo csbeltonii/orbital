@@ -1,4 +1,4 @@
-namespace Orbital.Sample.WebApi.SimpleContainerExample;
+namespace Orbital.Samples.Models.SimpleContainerExample;
 
 public class SampleItem(string userId, int price) : Entity(userId)
 {

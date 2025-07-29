@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>c9b69461-223b-4c42-a171-cdb5ee7d4631</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Orbital.Samples.Models\Orbital.Samples.Models.csproj" />
     <ProjectReference Include="..\..\src\Orbital.Extensions.DependencyInjection\Orbital.Extensions.DependencyInjection.csproj" />
     <ProjectReference Include="..\..\src\Orbital\Orbital.csproj" />
   </ItemGroup>

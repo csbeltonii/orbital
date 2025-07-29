@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Azure.Cosmos;
 using Orbital.Interfaces;
-using Orbital.Sample.WebApi.HierarchicalContainerExample;
+using Orbital.Samples.Models.HierarchicalContainerExample;
 
-namespace Orbital.Sample.WebApi;
+namespace Orbital.Samples.Models;
 
 public static class OrganizationItemEndpoints
 {

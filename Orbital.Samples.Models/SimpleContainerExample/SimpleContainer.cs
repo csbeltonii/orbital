@@ -1,6 +1,6 @@
 using Microsoft.Azure.Cosmos;
-using Orbital;
-using Orbital.Sample.WebApi.SimpleContainerExample;
+
+namespace Orbital.Samples.Models.SimpleContainerExample;
 
 public class SimpleContainer(CosmosClient cosmosClient, SimpleContainerConfiguration containerConfiguration)
     : BaseContainerAccessor(cosmosClient, containerConfiguration), ISimpleContainer;

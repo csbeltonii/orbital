@@ -1,6 +1,6 @@
 using Microsoft.Azure.Cosmos;
-using Orbital;
-using Orbital.Sample.WebApi.HierarchicalContainerExample;
+
+namespace Orbital.Samples.Models.HierarchicalContainerExample;
 
 public class HierarchicalContainer(
     CosmosClient cosmosClient,

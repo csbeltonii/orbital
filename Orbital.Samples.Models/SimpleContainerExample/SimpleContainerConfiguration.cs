@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 using Orbital.Extensions.DependencyInjection;
 using Orbital.Interfaces;
 
-namespace Orbital.Sample.WebApi.SimpleContainerExample;
+namespace Orbital.Samples.Models.SimpleContainerExample;
 
 public class SimpleContainerConfiguration(IOptions<OrbitalDatabaseConfiguration> orbitalDatabaseConfiguration)
     : IOrbitalContainerConfiguration

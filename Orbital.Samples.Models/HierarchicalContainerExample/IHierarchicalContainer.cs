@@ -1,0 +1,3 @@
+namespace Orbital.Samples.Models.HierarchicalContainerExample;
+
+public interface IHierarchicalContainer;

@@ -1,4 +1,4 @@
-namespace Orbital.Sample.WebApi.HierarchicalContainerExample;
+namespace Orbital.Samples.Models.HierarchicalContainerExample;
 
 public class OrganizationItem(string userId, int price, string orgId) : Entity(userId)
 {

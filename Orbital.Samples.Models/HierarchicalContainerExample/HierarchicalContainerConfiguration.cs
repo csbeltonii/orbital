@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 using Orbital.Extensions.DependencyInjection;
 using Orbital.Interfaces;
 
-namespace Orbital.Sample.WebApi.HierarchicalContainerExample;
+namespace Orbital.Samples.Models.HierarchicalContainerExample;
 
 public class HierarchicalContainerConfiguration(IOptions<OrbitalDatabaseConfiguration> orbitalDatabaseConfiguration) : IOrbitalContainerConfiguration
 {

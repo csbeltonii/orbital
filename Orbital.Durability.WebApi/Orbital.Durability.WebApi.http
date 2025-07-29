@@ -1,0 +1,6 @@
+@Orbital.Durability.WebApi_HostAddress = http://localhost:5185
+
+GET {{Orbital.Durability.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
