@@ -1,4 +1,4 @@
 ﻿namespace Orbital.Tests;
 
-[CollectionDefinition("CosmosDb")]
+[CollectionDefinition("CosmosDb", DisableParallelization = true)]
 public class CosmosTestCollection : IClassFixture<CosmosTestFixture>;
