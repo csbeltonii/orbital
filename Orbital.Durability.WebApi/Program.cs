@@ -25,13 +25,15 @@ builder.Services
                };
 
                orbitalCosmosOptions.UseCustomRetryPolicies = true;
+               orbitalCosmosOptions.PreferredRegions = [Regions.EastUS2, Regions.CentralUS];
            })
        .AddOrbitalResiliencePipeline(resiliencePipelineBuilder => resiliencePipelineBuilder.
                                          AddRetry(new RetryStrategyOptions 
                                          {
                                              MaxRetryAttempts = 8,
                                              ShouldHandle = new PredicateBuilder()
-                                                 .Handle<CosmosException>(ex => ex.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.GatewayTimeout),
+                                                 .Handle<CosmosException>(ex => ex.StatusCode is HttpStatusCode.TooManyRequests or
+                                                                              HttpStatusCode.GatewayTimeout),
                                          })
                                          .AddCircuitBreaker(new CircuitBreakerStrategyOptions 
                                          {

@@ -6,7 +6,7 @@ using Orbital.Interfaces;
 
 namespace Orbital;
 
-public class Repository<TEntity, TContainer>(
+internal class Repository<TEntity, TContainer>(
     TContainer cosmosContainerAccessor,
     ILogger<Repository<TEntity, TContainer>> logger)
     : IRepository<TEntity, TContainer>

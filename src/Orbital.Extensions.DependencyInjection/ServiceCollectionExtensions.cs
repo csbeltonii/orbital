@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json;
-using Azure.Core.Serialization;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +8,6 @@ using Orbital.Interfaces;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using JsonConverter = System.Text.Json.Serialization.JsonConverter;
-using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Orbital.Durability;
 
@@ -49,7 +47,8 @@ public static class ServiceCollectionExtensions
         var builder = new CosmosClientBuilder(cosmosConnectionString)
                       .WithConnectionModeDirect()
                       .WithCustomSerializer(serializer)
-                      .WithBulkExecution(true);
+                      .WithBulkExecution(true)
+                      .WithApplicationPreferredRegions(options.PreferredRegions);
 
         if (options.UseCustomRetryPolicies)
         {
@@ -102,8 +101,9 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection Decorate(this IServiceCollection services, Type serviceType, Type decoratorType)
     {
-        var descriptors = services.Where(s => s.ServiceType.IsGenericType &&
-                                              s.ServiceType.GetGenericTypeDefinition() == serviceType).ToList();
+        var descriptors = services
+                          .Where(s => s.ServiceType.IsGenericType &&
+                                              s.ServiceType.GetGenericTypeDefinition() == serviceType);
 
         foreach (var descriptor in descriptors)
         {
@@ -154,56 +154,4 @@ public static class ServiceCollectionExtensions
         return settings;
     }
 
-    private class CosmosSystemTextJsonSerializer(JsonSerializerOptions jsonSerializerOptions) : CosmosSerializer
-    {
-        private readonly JsonObjectSerializer systemTextJsonSerializer = new(jsonSerializerOptions);
-
-        public override T FromStream<T>(Stream stream)
-        {
-            using (stream)
-            {
-                if (stream is { CanSeek: true, Length: 0 })
-                {
-                    return default!;
-                }
-
-                if (typeof(Stream).IsAssignableFrom(typeof(T)))
-                {
-                    return (T)(object)stream;
-                }
-
-                return (T)systemTextJsonSerializer.Deserialize(stream, typeof(T), CancellationToken.None)!;
-            }
-        }
-
-        public override Stream ToStream<T>(T input)
-        {
-            MemoryStream streamPayload = new MemoryStream();
-            systemTextJsonSerializer.Serialize(streamPayload, input, input.GetType(), CancellationToken.None);
-            streamPayload.Position = 0;
-            return streamPayload;
-        }
-    }
-
-    private class CosmosNewtonsoftJsonSerializer(JsonSerializerSettings settings) : CosmosSerializer
-    {
-        private readonly JsonSerializer _serializer = JsonSerializer.Create(settings);
-
-        public override T FromStream<T>(Stream stream)
-        {
-            using var sr = new StreamReader(stream);
-            using var jsonTextReader = new JsonTextReader(sr);
-            return _serializer.Deserialize<T>(jsonTextReader)!;
-        }
-
-        public override Stream ToStream<T>(T input)
-        {
-            var stream = new MemoryStream();
-            using var writer = new StreamWriter(stream, leaveOpen: true);
-            _serializer.Serialize(writer, input);
-            writer.Flush();
-            stream.Position = 0;
-            return stream;
-        }
-    }
 }

@@ -34,5 +34,8 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
     <PackageReference Include="Polly" Version="8.6.4" />
+    <InternalsVisibleTo Include="Orbital.Tests" />
+    <InternalsVisibleTo Include="Orbital.Extensions.DependencyInjection" />
   </ItemGroup>
+
 </Project>

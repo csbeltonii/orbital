@@ -44,4 +44,9 @@ public class OrbitalCosmosOptions
     /// and repository operations are wrapped using user-defined Polly retry pipelines.
     /// </summary>
     public bool UseCustomRetryPolicies { get; set; }
+
+    /// <summary>
+    /// Preferred application regions.
+    /// </summary>
+    public IReadOnlyList<string> PreferredRegions { get; set; } = [];
 }

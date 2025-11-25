@@ -6,7 +6,7 @@ using Orbital.Models;
 
 namespace Orbital;
 
-public class BulkRepository<TEntity, TContainer>(
+internal class BulkRepository<TEntity, TContainer>(
     TContainer cosmosContainerAccessor, 
     ILogger<BulkRepository<TEntity, TContainer>> logger)
     : IBulkRepository<TEntity, TContainer>
