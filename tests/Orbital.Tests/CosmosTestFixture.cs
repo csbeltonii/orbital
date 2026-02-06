@@ -13,8 +13,7 @@ public class CosmosTestFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        Container = new CosmosDbBuilder()
-                    .WithImage("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
+        Container = new CosmosDbBuilder("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
                     .WithCleanUp(true)
                     .Build();
 
@@ -35,8 +34,5 @@ public class CosmosTestFixture : IAsyncLifetime
             });
     }
 
-    public async Task DisposeAsync()
-    {
-        await Container.StopAsync();
-    }
+    public async Task DisposeAsync() => await Container.StopAsync();
 }
