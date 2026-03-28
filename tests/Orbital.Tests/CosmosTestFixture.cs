@@ -13,7 +13,7 @@ public class CosmosTestFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        Container = new CosmosDbBuilder("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
+        Container = new CosmosDbBuilder("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview")
                     .WithCleanUp(true)
                     .Build();
 
