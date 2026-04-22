@@ -8,8 +8,6 @@ using Orbital.Interfaces;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
 using JsonConverter = System.Text.Json.Serialization.JsonConverter;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Orbital.Durability;
 
 namespace Orbital.Extensions.DependencyInjection;
 
@@ -50,15 +48,6 @@ public static class ServiceCollectionExtensions
                       .WithBulkExecution(true)
                       .WithApplicationPreferredRegions(options.PreferredRegions);
 
-        if (options.UseCustomRetryPolicies)
-        {
-            builder.WithThrottlingRetryOptions(TimeSpan.Zero, 0);
-
-            services.Decorate(typeof(IRepository<,>), typeof(DurableRepository<,>))
-                    .Decorate(typeof(IBulkRepository<,>), typeof(DurableBulkRepository<,>))
-                    .TryAddSingleton<IDurabilityPolicyProvider, DurabilityPolicyProvider>();
-        }
-
         services.AddSingleton(builder.Build());
 
         return services;
@@ -98,28 +87,6 @@ public static class ServiceCollectionExtensions
 
     private static IServiceCollection AddCosmosBulkRepositories(this IServiceCollection services) =>
         services.AddSingleton(typeof(IBulkRepository<,>), typeof(BulkRepository<,>));
-
-    private static IServiceCollection Decorate(this IServiceCollection services, Type serviceType, Type decoratorType)
-    {
-        var descriptors = services
-                          .Where(s => s.ServiceType.IsGenericType &&
-                                              s.ServiceType.GetGenericTypeDefinition() == serviceType);
-
-        foreach (var descriptor in descriptors)
-        {
-            var decoratedType = decoratorType.MakeGenericType(descriptor.ServiceType.GenericTypeArguments);
-            var originalType = descriptor.ImplementationType;
-
-            services.Remove(descriptor);
-            services.AddTransient(descriptor.ServiceType, provider =>
-            {
-                var original = ActivatorUtilities.CreateInstance(provider, originalType!);
-                return ActivatorUtilities.CreateInstance(provider, decoratedType, original);
-            });
-        }
-
-        return services;
-    }
 
     private static JsonSerializerOptions BuildSystemTextJsonOptions(IEnumerable<JsonConverter> converters)
     {
