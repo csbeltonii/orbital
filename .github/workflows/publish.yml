@@ -9,27 +9,36 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
-      - name: 🧾 Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: 🧰 Setup .NET
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
 
-      - name: 📦 Restore
+      - name: Restore
         run: dotnet restore
 
-      - name: ✅ Test
+      - name: Test
         run: dotnet test --configuration Release --verbosity normal
 
-      - name: 📦 Pack Orbital core
+      - name: Pack Orbital
         run: dotnet pack src/Orbital/Orbital.csproj --configuration Release --output ./nupkgs
 
-      - name: 📦 Pack DI extensions
+      - name: Pack dependency injection extensions
         run: dotnet pack src/Orbital.Extensions.DependencyInjection/Orbital.Extensions.DependencyInjection.csproj --configuration Release --output ./nupkgs
 
-      - name: 🚀 Publish to NuGet (stable)
-        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+      - name: Log in to NuGet
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Publish to NuGet
+        run: dotnet nuget push ./nupkgs/*.nupkg --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
