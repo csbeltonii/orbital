@@ -37,7 +37,7 @@ Add your container configuration to `appsettings.json`:
 // Register Cosmos Client
 services.AddOrbitalCosmos(orbitalCosmosOptions =>
 {
-    orbitalCosmosOptions.Configuration = configuration;
+    orbitalCosmosOptions.Authentication.Configuration = configuration;
     orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
 });
 
@@ -131,7 +131,7 @@ Use this for larger systems with multiple Cosmos containers.
 ```csharp
 services.AddOrbitalCosmos(orbitalCosmosOptions =>
 {
-    orbitalCosmosOptions.Configuration = configuration;
+    orbitalCosmosOptions.Authentication.Configuration = configuration;
     orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
 });
 
@@ -167,6 +167,40 @@ public class SampleItemService(IRepository<SampleItem, SimpleContainer> reposito
 }
 ```
 
+## Authentication
+
+Connection-string authentication remains the default. Orbital reads `CosmosDbConnectionString`
+from the supplied configuration unless an override is provided:
+
+```csharp
+services.AddOrbitalCosmos(options =>
+{
+    options.Authentication.Configuration = configuration;
+    options.Authentication.OverrideConnectionString = connectionString;
+});
+```
+
+To use Microsoft Entra authentication, configure the Cosmos DB account endpoint and select
+`DefaultAzureCredential`:
+
+```json
+{
+  "CosmosDbAccountEndpoint": "https://your-account.documents.azure.com:443/"
+}
+```
+
+```csharp
+services.AddOrbitalCosmos(options =>
+{
+    options.Authentication.Configuration = configuration;
+    options.Authentication.AuthenticationType =
+        OrbitalCosmosAuthenticationType.DefaultAzureCredential;
+});
+```
+
+The account endpoint can instead be supplied through
+`options.Authentication.OverrideAccountEndpoint`.
+
 ## Customizing the Serializer
 
 When using the configuration action, you can use the SystemTextJsonOptions and NewtonsoftJsonSettings properties to configure the serializer.
@@ -174,17 +208,11 @@ When using the configuration action, you can use the SystemTextJsonOptions and N
 ```csharp
 services.AddOrbitalCosmos(orbitalCosmosOptions =>
 {
-    orbitalCosmosOptions.Configuration = configuration;
+    orbitalCosmosOptions.Authentication.Configuration = configuration;
     orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
-    orbitalCosmosOptions.SystemTextJsonOptions = new
+    orbitalCosmosOptions.SystemTextJsonOptions = new JsonSerializerOptions
     {
-        orbitalCosmosOptions.Configuration = configuration;
-        orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
-
-        orbitalCosmosOptions.SystemTextJsonOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 });
 ```

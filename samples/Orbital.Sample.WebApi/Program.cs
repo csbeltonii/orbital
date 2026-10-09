@@ -19,7 +19,7 @@ builder.Services
        .AddOrbitalCosmos(
            orbitalCosmosOptions =>
            {
-               orbitalCosmosOptions.Configuration = configuration;
+               orbitalCosmosOptions.Authentication.Configuration = configuration;
                orbitalCosmosOptions.SerializerType = OrbitalSerializerType.SystemTextJson;
 
                orbitalCosmosOptions.SystemTextJsonOptions = new JsonSerializerOptions

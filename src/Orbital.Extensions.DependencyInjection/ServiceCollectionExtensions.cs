@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json;
+using Azure.Identity;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
@@ -21,10 +22,6 @@ public static class ServiceCollectionExtensions
 
         configurationAction(options);
 
-        var cosmosConnectionString = options.OverrideConnectionString ?? 
-                                     options.Configuration?["CosmosDbConnectionString"] ?? 
-                                     throw new InvalidOperationException("No Cosmos DB connection string provided. Set 'OverrideConnectionString' or ensure 'CosmosDbConnectionString' exists in configuration.");
-
         CosmosSerializer serializer = options.SerializerType switch
         {
             OrbitalSerializerType.SystemTextJson => new CosmosSystemTextJsonSerializer(
@@ -42,7 +39,7 @@ public static class ServiceCollectionExtensions
                 .AddCosmosBulkRepositories()
                 .AddOptions();
 
-        var builder = new CosmosClientBuilder(cosmosConnectionString)
+        var builder = CreateCosmosClientBuilder(options.Authentication)
                       .WithConnectionModeDirect()
                       .WithCustomSerializer(serializer)
                       .WithBulkExecution(true)
@@ -52,6 +49,25 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
+    private static CosmosClientBuilder CreateCosmosClientBuilder(
+        OrbitalCosmosAuthenticationOptions authentication) =>
+        authentication.AuthenticationType switch
+        {
+            OrbitalCosmosAuthenticationType.ConnectionString => new CosmosClientBuilder(
+                authentication.OverrideConnectionString
+                ?? authentication.Configuration?["CosmosDbConnectionString"]
+                ?? throw new InvalidOperationException(
+                    "No Cosmos DB connection string provided. Set 'Authentication.OverrideConnectionString' or ensure 'CosmosDbConnectionString' exists in configuration.")),
+            OrbitalCosmosAuthenticationType.DefaultAzureCredential => new CosmosClientBuilder(
+                authentication.OverrideAccountEndpoint
+                ?? authentication.Configuration?["CosmosDbAccountEndpoint"]
+                ?? throw new InvalidOperationException(
+                    "No Cosmos DB account endpoint provided. Set 'Authentication.OverrideAccountEndpoint' or ensure 'CosmosDbAccountEndpoint' exists in configuration."),
+                new DefaultAzureCredential()),
+            _ => throw new NotSupportedException(
+                $"Unsupported Cosmos DB authentication type: {authentication.AuthenticationType}")
+        };
 
     public static IServiceCollection AddCosmosContainer<TContainerAccessor, TContainerSettings>(
         this IServiceCollection services,

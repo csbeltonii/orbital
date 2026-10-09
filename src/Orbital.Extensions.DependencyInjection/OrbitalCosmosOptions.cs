@@ -1,4 +1,3 @@
-﻿using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using Newtonsoft.Json;
 using JsonConverter = System.Text.Json.Serialization.JsonConverter;
@@ -7,7 +6,10 @@ namespace Orbital.Extensions.DependencyInjection;
 
 public class OrbitalCosmosOptions
 {
-    public IConfiguration? Configuration { get; set; }
+    /// <summary>
+    /// Cosmos DB authentication configuration.
+    /// </summary>
+    public OrbitalCosmosAuthenticationOptions Authentication { get; } = new();
 
     /// <summary>
     /// Select the serialization engine for Cosmos documents.
@@ -33,11 +35,6 @@ public class OrbitalCosmosOptions
     /// Converters to use with Newtonsoft.Json if NewtonsoftJsonSettings is not provided.
     /// </summary>
     public IEnumerable<Newtonsoft.Json.JsonConverter> NewtonsoftJsonConverters { get; set; } = [];
-
-    /// <summary>
-    /// Optional override for the Cosmos DB connection string.
-    /// </summary>
-    public string? OverrideConnectionString { get; set; }
 
     /// <summary>
     /// Preferred application regions.

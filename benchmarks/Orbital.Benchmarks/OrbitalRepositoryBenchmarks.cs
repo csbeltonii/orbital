@@ -45,7 +45,7 @@ public class OrbitalRepositoryBenchmarks
                 options => 
                 { 
                     options.SerializerType = serializerType; 
-                    options.OverrideConnectionString = EmulatorConnectionString;
+                    options.Authentication.OverrideConnectionString = EmulatorConnectionString;
                 })
             .AddSingleton<IOrbitalContainerConfiguration>(new BenchmarkDocumentContainerConfiguration())
             .AddSingleton<BenchmarkDocumentContainerAccessor>()
